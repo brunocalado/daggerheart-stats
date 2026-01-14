@@ -41,7 +41,7 @@ Reviewing the session's dice rolls is a great way to wrap up the night. Addition
 Install via the Foundry VTT Module browser or use this manifest link:
 
 ```js
-https://raw.githubusercontent.com/brunocalado/daggerheart-stats/main/module.json
+https://raw.githubusercontent.com/brunocalado/daggerheart-stats/refs/heads/main/module.json
 ```
 
 ## ⚖️ Credits
