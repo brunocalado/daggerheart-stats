@@ -1,0 +1,74 @@
+<div class="dhs-management-wrapper">
+    <!-- TABS NAVIGATION -->
+    <div class="dhs-tabs">
+        <button type="button" class="dhs-tab-btn active" data-tab="user-management">User Management</button>
+        <button type="button" class="dhs-tab-btn" data-tab="date-management">Date Management</button>
+    </div>
+
+    <!-- TAB 1: USER MANAGEMENT -->
+    <div id="tab-user-management" class="tab-content active">
+        <div class="management-section">
+            <div class="mng-header">
+                <i class="fas fa-users-cog"></i> Client Data Operations
+            </div>
+            
+            <div class="user-list">
+                {{#each users}}
+                <div class="user-row">
+                    <span class="user-name">{{this.name}}</span>
+                    <div class="user-actions">
+                        <button type="button" class="action-btn btn-export" data-action="exportData" data-user="{{this.name}}" data-tooltip="Export Data">
+                            <i class="fas fa-file-export"></i>
+                        </button>
+                        
+                        <button type="button" class="action-btn btn-import" data-action="importData" data-user="{{this.name}}" data-tooltip="Import Data (Overwrites)">
+                            <i class="fas fa-file-import"></i>
+                        </button>
+                        
+                        <button type="button" class="action-btn btn-delete" data-action="deleteData" data-user="{{this.name}}" data-tooltip="Delete All Data">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+
+            <!-- Global Wipe Button -->
+            <div class="wipe-all-container">
+                <button type="button" class="btn-wipe-all" data-action="fullWipe">
+                    <i class="fas fa-radiation"></i> WIPE ALL DATA
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: DATE MANAGEMENT -->
+    <div id="tab-date-management" class="tab-content">
+        <div class="management-section">
+            <div class="mng-header">
+                <i class="fas fa-calendar-alt"></i> Single Date Management
+            </div>
+            
+            <!-- UPDATED LAYOUT: Space Between for Left/Right alignment -->
+            <div class="date-controls" style="display: flex; justify-content: space-between; align-items: center; gap: 15px; width: 100%;">
+                
+                <!-- Left Side: User Select -->
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label>Select User:</label>
+                    <select id="select-usertomanage" name="usertomanage" class="compact-select"> 
+                        {{{whichuser}}}
+                    </select>
+                </div>
+
+                <!-- Right Side: Instruction Text -->
+                <div style="font-size: 0.9em; color: #FFFFFF; font-style: italic; white-space: nowrap;">
+                    Click a date below to delete specific session data:
+                </div>
+            </div>
+            
+            <div id="list-dates">
+                <!-- Buttons injected via JS into .dates-list-container -->
+            </div>
+        </div>
+    </div>
+</div>

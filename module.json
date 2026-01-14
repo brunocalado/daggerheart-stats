@@ -1,0 +1,29 @@
+{
+  "id": "daggerheart-stats",
+  "title": "Daggerheart: Stats",
+  "description": "Shows Statistics for Daggerheart dice rolls.",
+  "version": "0.0.1",
+  "authors": [],
+  "relationships": {
+    "systems": [
+      {
+        "id": "daggerheart",
+        "type": "system",
+        "compatibility": {}
+      }
+    ]
+  },
+  "styles": [
+    "styles/dhs.css"
+  ],
+  "esmodules": [
+    "scripts/dhs.js"
+  ],
+  "url": "",
+  "manifest": "",
+  "download": "",
+  "compatibility": {
+    "minimum": "13",
+    "verified": "13"
+  }
+}
