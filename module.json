@@ -2,7 +2,7 @@
   "id": "daggerheart-stats",
   "title": "Daggerheart: Stats",
   "description": "Shows Statistics for Daggerheart dice rolls.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "authors": [],
   "relationships": {
     "systems": [
@@ -19,9 +19,11 @@
   "esmodules": [
     "scripts/dhs.js"
   ],
-  "url": "",
-  "manifest": "",
-  "download": "",
+  
+  "url": "https://github.com/brunocalado/daggerheart-stats",
+  "manifest": "https://raw.githubusercontent.com/brunocalado/daggerheart-stats/main/module.json",
+  "download": "https://codeload.github.com/brunocalado/daggerheart-stats/zip/main",
+  
   "compatibility": {
     "minimum": "13",
     "verified": "13"
