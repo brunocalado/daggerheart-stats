@@ -30,10 +30,10 @@ class UserDices {
         this.gmHits = 0;   
         this.gmMisses = 0; 
 
-        // Player Additional Stats (Hits/Miss only now)
+        // Player Hit and Miss statistics
         this.playerHits = 0;
         this.playerMisses = 0;
-        // NEW: Hope Earned & Fear Generated (Action Rolls Only)
+        // Hope Earned & Fear Generated (Action Rolls Only)
         this.playerHopeEarned = 0;
         this.playerFearGenerated = 0;
 
@@ -115,7 +115,7 @@ class UserDices {
         else if (isHope) targetStats.hope++;
         else if (isFear) targetStats.fear++;
         
-        // NEW: Track Hope Earned / Fear Generated for Action Rolls Only
+        // Track Hope Earned / Fear Generated for Action Rolls Only
         if (type === "action") {
             if (isHope || isCrit) { 
                 this.playerHopeEarned++;
@@ -171,7 +171,7 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
 
             let whichuser = this._getUsersOptions();
             
-            // Passa range completo para o cálculo inicial
+            // Pass complete range for initial calculation
             let p = updatedata(datarange[0], datarange[datarange.length - 1], theuser, 'all');
             let dates = populatedates(theuser);
 
@@ -189,7 +189,7 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                 isPaused: paus,
                 isSelectedUserGM: isSelectedUserGM,
                 
-                // Dados GM
+                // GM Data
                 gmD20Count: p['gmD20Count'],
                 gmCrits: p['gmCrits'], 
                 gmFearGain: p['gmFearGain'],
@@ -198,7 +198,7 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                 gmHits: p['gmHits'],    
                 gmMisses: p['gmMisses'],
                 
-                // Dados Jogador
+                // Player Data
                 dualityCount: p['dualityCount'],
                 dualityHope: p['dualityHope'], 
                 dualityFear: p['dualityFear'],
@@ -635,18 +635,13 @@ Hooks.on('getSceneControlButtons', function (controls) {
     if(Array.isArray(bar.tools)) bar.tools.push(btnData); else bar.tools.dices = btnData;
 });
 
-// NEW HOOK: Add Stats button to sidebar
+// Add Stats button to sidebar
 Hooks.on("renderDaggerheartMenu", (app, element, data) => {
     const html = element instanceof jQuery ? element[0] : element;
 
     const myButton = document.createElement("button");
     myButton.type = "button";
     myButton.innerHTML = `<i class="fas fa-chart-bar"></i> Stats`; // Icon + Text
-    // Removed specific style class as requested, using default system style?
-    // User said "não coloque estilo nele" but usually buttons need some style to look good.
-    // I will add basic style inline to match context if needed, but keeping it simple.
-    // Actually, user said "não coloque estilo nele" referring to custom CSS classes maybe?
-    // I'll stick to system default appearance by not adding 'dh-custom-btn'.
     myButton.style.marginTop = "10px";
     myButton.style.width = "100%";
     
@@ -660,15 +655,6 @@ Hooks.on("renderDaggerheartMenu", (app, element, data) => {
 
     const fieldset = html.querySelector("fieldset");
     if (fieldset) {
-        // If there's already a fieldset (like for Quick Rules), append after or inside?
-        // User example created a new fieldset. I'll follow that pattern.
-        // Check if a Stats fieldset already exists to avoid dupes?
-        // Simpler: Just append to the end of the menu.
-        // Wait, user example: fieldset.after(newFieldset);
-        
-        // Let's see if we can just append the button to the existing container if no fieldset structure is mandatory.
-        // But for sidebar menus, grouping is good.
-        
         const newFieldset = document.createElement("fieldset");
         const legend = document.createElement("legend");
         legend.innerText = "Statistics"; 
@@ -702,7 +688,7 @@ function detectroll(chatMessage) {
     let currentStats = new UserDices(user.name);
     Object.assign(currentStats, userflag[dateString]);
     
-    // Init legacy
+    // Initialize default objects
     if (!currentStats.duality) currentStats.duality = { count: 0, hope: 0, fear: 0, crit: 0, totalSum: 0 };
     if (!currentStats.dualityTotals) currentStats.dualityTotals = {};
     if (!currentStats.actionStats) currentStats.actionStats = { count: 0, hope: 0, fear: 0, crit: 0 };
@@ -715,17 +701,17 @@ function detectroll(chatMessage) {
     if (currentStats.d20Count === undefined) currentStats.d20Count = 0;
     if (currentStats.gmCrits === undefined) currentStats.gmCrits = 0;
     
-    // Init New Fear Stats & Fumbles & Hits/Miss
+    // Initialize Fear Stats & Fumbles & Hits/Miss
     if (currentStats.gmFearGain === undefined) currentStats.gmFearGain = 0;
     if (currentStats.gmFearSpend === undefined) currentStats.gmFearSpend = 0;
     if (currentStats.gmFumbles === undefined) currentStats.gmFumbles = 0;
     if (currentStats.gmHits === undefined) currentStats.gmHits = 0;
     if (currentStats.gmMisses === undefined) currentStats.gmMisses = 0;
 
-    // Init Player Hit/Miss Stats
+    // Initialize Player Hit/Miss Stats
     if (currentStats.playerHits === undefined) currentStats.playerHits = 0;
     if (currentStats.playerMisses === undefined) currentStats.playerMisses = 0;
-    // Init New Action Only Stats
+    // Initialize Action Only Stats
     if (currentStats.playerHopeEarned === undefined) currentStats.playerHopeEarned = 0;
     if (currentStats.playerFearGenerated === undefined) currentStats.playerFearGenerated = 0;
 
@@ -832,7 +818,7 @@ function detectroll(chatMessage) {
             }
         } 
 
-        // Player Hit/Miss Logic - UPDATED: Depends on Action Context
+        // Player Hit/Miss Logic - Depends on Action Context
         if (chatMessage.system.targetShort) {
             const ts = chatMessage.system.targetShort;
             const hitVal = parseInt(ts.hit) || 0;

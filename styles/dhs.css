@@ -325,7 +325,6 @@
     font-weight: 700;
     font-size: 18px;
     
-    /* UPDATED: Removed Background Color */
     color: var(--dh-color-gold);
     
     padding: 10px 4px;
@@ -501,7 +500,6 @@
 
 .stat-line {
     font-weight: 700;
-    text-transform: uppercase;
     display: flex;
     align-items: center;
     justify-content: center;
