@@ -506,9 +506,11 @@
     gap: 5px;
 }
 
-/* --- SUMMARY WINDOW STYLES --- */
-.summary-content {
-    padding: 15px;
+/* --- SUMMARY WINDOW ISOLATED STYLES --- */
+/* Everything inside .dhs-summary-scope is isolated */
+
+.dhs-summary-scope .summary-content {
+    padding: 5px; /* UPDATED to 5px as requested */
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -516,9 +518,7 @@
     max-height: 80vh;
 }
 
-/* Removed .summary-header as requested */
-
-.gm-card {
+.dhs-summary-scope .gm-card {
     background: var(--dh-color-text);
     color: var(--dh-color-gold);
     padding: 15px;
@@ -527,7 +527,7 @@
     box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 
-.gm-card h3 {
+.dhs-summary-scope .gm-card h3 {
     margin: 0 0 10px 0;
     font-family: var(--dh-font-header);
     border-bottom: 1px solid rgba(193, 154, 86, 0.3);
@@ -536,37 +536,37 @@
     justify-content: space-between;
 }
 
-.gm-grid {
+.dhs-summary-scope .gm-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 10px;
     text-align: center;
 }
 
-.gm-stat {
+.dhs-summary-scope .gm-stat {
     display: flex;
     flex-direction: column;
     gap: 2px;
 }
 
-.gm-stat label {
+.dhs-summary-scope .gm-stat label {
     font-size: 0.8em;
     text-transform: uppercase;
     color: #999;
 }
 
-.gm-stat span {
+.dhs-summary-scope .gm-stat span {
     font-weight: bold;
     font-size: 1.1em;
 }
 
-.player-list {
+.dhs-summary-scope .player-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-.player-card {
+.dhs-summary-scope .player-card {
     background: #fff;
     border: 1px solid var(--dh-color-gold);
     border-radius: 4px;
@@ -575,34 +575,71 @@
     flex-direction: column;
 }
 
-.player-header {
+/* Updated Player Header for Badges */
+.dhs-summary-scope .player-header {
     display: flex;
     align-items: center;
+    justify-content: space-between; /* Space name left, badges right */
     gap: 10px;
     border-bottom: 1px solid rgba(0,0,0,0.1);
     padding-bottom: 5px;
     margin-bottom: 8px;
+    min-height: 28px;
+}
+
+.dhs-summary-scope .player-identity {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     font-family: var(--dh-font-header);
     font-weight: bold;
     font-size: 16px;
-    color: #000000; /* FORCE BLACK TEXT */
+    color: #000000;
 }
 
-.player-header .color-dot {
+.dhs-summary-scope .color-dot {
     width: 12px;
     height: 12px;
     border-radius: 50%;
     border: 1px solid rgba(0,0,0,0.2);
 }
 
-.player-stats-grid {
+.dhs-summary-scope .player-badges {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.dhs-summary-scope .badge {
+    font-size: 0.7em;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border: 1px solid rgba(0,0,0,0.1);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Badge Colors based on type */
+.dhs-summary-scope .badge-fear { background-color: #3e2723; color: #ffab91; border-color: #5d4037; } /* Dark Brown/Reddish */
+.dhs-summary-scope .badge-hope { background-color: #e8f5e9; color: #2e7d32; border-color: #a5d6a7; } /* Light Green */
+.dhs-summary-scope .badge-chaos { background-color: #ffebee; color: #c62828; border-color: #ef9a9a; } /* Light Red */
+.dhs-summary-scope .badge-crit { background-color: #fff8e1; color: #f57f17; border-color: #ffe082; } /* Gold/Amber */
+.dhs-summary-scope .badge-hit { background-color: #e3f2fd; color: #1565c0; border-color: #90caf9; } /* Blue */
+.dhs-summary-scope .badge-beacon { background-color: #f3e5f5; color: #7b1fa2; border-color: #ce93d8; } /* Purple */
+.dhs-summary-scope .badge-miss { background-color: #eeeeee; color: #616161; border-color: #bdbdbd; } /* Grey, removed line-through */
+
+.dhs-summary-scope .player-stats-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 8px;
     font-size: 0.9em;
 }
 
-.p-stat {
+.dhs-summary-scope .p-stat {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -612,16 +649,16 @@
     border-radius: 4px;
 }
 
-.p-stat label {
+.dhs-summary-scope .p-stat label {
     font-size: 0.75em;
     color: #666;
     margin-bottom: 2px;
 }
 
-.p-stat span {
+.dhs-summary-scope .p-stat span {
     font-weight: bold;
     color: var(--dh-color-text);
 }
 
-.stat-val-hope { color: var(--dh-color-hope) !important; }
-.stat-val-fear { color: var(--dh-color-fear) !important; }
+.dhs-summary-scope .stat-val-hope { color: var(--dh-color-hope) !important; }
+.dhs-summary-scope .stat-val-fear { color: var(--dh-color-fear) !important; }

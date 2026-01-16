@@ -33,6 +33,22 @@
     "type": "setup",
     "url": "modules/daggerheart-stats/assets/images/thumbnail.webp",
     "thumbnail": "modules/daggerheart-stats/assets/images/thumbnail.webp"
-  }]
+  }],
+
+  "packs": [
+    {
+      "label": "Macros",
+      "type": "Macro",
+      "name": "macros",
+      "path": "packs/macros",
+      "system": "daggerheart",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      },
+      "flags": {},
+      "banner": "modules/daggerheart-stats/assets/images/banner.webp" 
+    }    
+  ]  
   
 }

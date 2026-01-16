@@ -138,7 +138,7 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
     static DEFAULT_OPTIONS = {
         id: "dhs-summary-win",
         tag: "div",
-        classes: ["dhs-summary"],
+        classes: ["dhs-summary-scope"], // Isolated CSS scope class
         window: {
             title: "Daggerheart: Session Summary",
             icon: "fas fa-clipboard-list",
@@ -146,7 +146,7 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
             contentClasses: ["summary-content"]
         },
         position: {
-            width: 800,
+            width: 900, // Slightly wider for badges
             height: "auto"
         }
     };
@@ -164,16 +164,13 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         let gmData = null;
         let playersData = [];
 
+        // 1. Gather Data
         for (const user of users) {
-            // Get data for this user in the selected range
             const result = updatedata(this.dateFrom, this.dateTo, user.name, 'all');
-            
-            // Calculate Min/Max/Avg
             let mathStats = { min: '-', max: '-', avg: '-' };
             
             if (user.isGM) {
                 mathStats = this._calculateMathStats(result.d20Totals);
-                
                 gmData = {
                     name: user.name,
                     color: user.color,
@@ -190,7 +187,6 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                 };
             } else {
                 mathStats = this._calculateMathStats(result.dualityTotals);
-
                 playersData.push({
                     name: user.name,
                     color: user.color,
@@ -203,9 +199,83 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                     fearGen: result.playerFearGenerated,
                     min: mathStats.min,
                     max: mathStats.max,
-                    avg: mathStats.avg
+                    avg: mathStats.avg,
+                    badges: [] // Initialize badges array
                 });
             }
+        }
+
+        // --- BADGE ASSIGNMENT LOGIC ---
+
+        // Helper function to find players with max value in a category (ignoring 0)
+        const findWinners = (metric) => {
+            let max = 0;
+            playersData.forEach(p => { if (p[metric] > max) max = p[metric]; });
+            if (max === 0) return [];
+            return playersData.filter(p => p[metric] === max);
+        };
+
+        // 2. Assign Independent Badges
+        findWinners('fearGen').forEach(p => 
+            p.badges.push({ label: "DM's Best Friend", class: "badge-fear", tooltip: "Most Fear Generated" }));
+        
+        findWinners('crits').forEach(p => 
+            p.badges.push({ label: "God Mode", class: "badge-crit", tooltip: "Most Critical Successes" }));
+        
+        findWinners('hopeEarned').forEach(p => 
+            p.badges.push({ label: "The Beacon", class: "badge-beacon", tooltip: "Most Hope Earned" }));
+
+        // 3. Assign Mutually Exclusive Group 1: Professional vs Stormtrooper
+        // Rule: Winner of Professional CANNOT win Stormtrooper.
+        
+        // A. Assign Professional
+        const profWinners = findWinners('hits');
+        const profNames = new Set();
+        
+        profWinners.forEach(p => {
+            p.badges.push({ label: "The Professional", class: "badge-hit", tooltip: "Most Hits on Target" });
+            profNames.add(p.name);
+        });
+
+        // B. Assign Stormtrooper (excluding Professionals)
+        let maxMisses = 0;
+        playersData.forEach(p => {
+            // Only consider player if NOT in the Professional list
+            if (!profNames.has(p.name) && p.misses > maxMisses) {
+                maxMisses = p.misses;
+            }
+        });
+
+        if (maxMisses > 0) {
+            playersData.filter(p => !profNames.has(p.name) && p.misses === maxMisses).forEach(p => {
+                p.badges.push({ label: "Stormtrooper", class: "badge-miss", tooltip: "Most Misses on Target" });
+            });
+        }
+
+        // 4. Assign Mutually Exclusive Group 2: Good Vibes vs Chaos Agent
+        // Rule: Winner of Good Vibes CANNOT win Chaos Agent.
+
+        // A. Assign Good Vibes Only
+        const vibeWinners = findWinners('hopeRolls');
+        const vibeNames = new Set();
+
+        vibeWinners.forEach(p => {
+            p.badges.push({ label: "Good Vibes Only", class: "badge-hope", tooltip: "Most Rolls with Hope" });
+            vibeNames.add(p.name);
+        });
+
+        // B. Assign Chaos Agent (excluding Good Vibes winners)
+        let maxFearRolls = 0;
+        playersData.forEach(p => {
+            if (!vibeNames.has(p.name) && p.fearRolls > maxFearRolls) {
+                maxFearRolls = p.fearRolls;
+            }
+        });
+
+        if (maxFearRolls > 0) {
+            playersData.filter(p => !vibeNames.has(p.name) && p.fearRolls === maxFearRolls).forEach(p => {
+                p.badges.push({ label: "Chaos Agent", class: "badge-chaos", tooltip: "Most Rolls with Fear" });
+            });
         }
 
         return {
@@ -267,7 +337,8 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         actions: {
             toggleSave: ChartWindow._onToggleSave,
             manageData: ChartWindow._onManageData,
-            openSummary: ChartWindow._onOpenSummary
+            openSummary: ChartWindow._onOpenSummary,
+            refreshData: ChartWindow._onRefreshData // Nova Ação
         }
     };
 
@@ -486,8 +557,6 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
     
     // Updated Action Handler
     static _onOpenSummary(event, target) {
-        // Removed console logs here
-
         // 'this' refers to the Application instance when invoked by Foundry actions
         const appElement = this.element; 
         
@@ -499,8 +568,6 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         const fromVal = appElement.querySelector('#fromdateselect')?.value;
         const toVal = appElement.querySelector('#todateselect')?.value;
         
-        // Removed logs here
-
         if (!fromVal || !toVal) {
             ui.notifications.warn("Please select a date range first.");
             return;
@@ -512,6 +579,11 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
             console.error("DHS | Failed to open SummaryWindow:", err);
             ui.notifications.error("Failed to open summary. Check console.");
         }
+    }
+
+    static _onRefreshData(event, target) {
+        this.render(); // Re-render the application to fetch fresh data
+        // Notificação removida conforme solicitado
     }
 
     _getUsersOptions() {
