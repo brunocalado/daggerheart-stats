@@ -126,7 +126,128 @@ class UserDices {
     }
 }
 
-//////////////////////////////////////    APP CLASS    //////////////////////////////////////    
+//////////////////////////////////////    SUMMARY WINDOW CLASS    //////////////////////////////////////
+
+class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
+    constructor(options = {}) {
+        super(options);
+        this.dateFrom = options.dateFrom;
+        this.dateTo = options.dateTo;
+    }
+
+    static DEFAULT_OPTIONS = {
+        id: "dhs-summary-win",
+        tag: "div",
+        classes: ["dhs-summary"],
+        window: {
+            title: "Daggerheart: Session Summary",
+            icon: "fas fa-clipboard-list",
+            resizable: true,
+            contentClasses: ["summary-content"]
+        },
+        position: {
+            width: 800,
+            height: "auto"
+        }
+    };
+
+    static get PARTS() {
+        return {
+            content: {
+                template: `modules/${MODULE_ID}/templates/summary.hbs`,
+            }
+        };
+    }
+
+    async _prepareContext(options) {
+        const users = game.users.contents;
+        let gmData = null;
+        let playersData = [];
+
+        for (const user of users) {
+            // Get data for this user in the selected range
+            const result = updatedata(this.dateFrom, this.dateTo, user.name, 'all');
+            
+            // Calculate Min/Max/Avg
+            let mathStats = { min: '-', max: '-', avg: '-' };
+            
+            if (user.isGM) {
+                mathStats = this._calculateMathStats(result.d20Totals);
+                
+                gmData = {
+                    name: user.name,
+                    color: user.color,
+                    totalD20: result.gmD20Count,
+                    crits: result.gmCrits,
+                    fumbles: result.gmFumbles,
+                    hits: result.gmHits,
+                    misses: result.gmMisses,
+                    fearEarned: result.gmFearGain,
+                    fearSpent: result.gmFearSpend,
+                    min: mathStats.min,
+                    max: mathStats.max,
+                    avg: mathStats.avg
+                };
+            } else {
+                mathStats = this._calculateMathStats(result.dualityTotals);
+
+                playersData.push({
+                    name: user.name,
+                    color: user.color,
+                    hopeRolls: result.dualityHope, 
+                    crits: result.dualityCrit,
+                    hits: result.playerHits,
+                    misses: result.playerMisses,
+                    fearRolls: result.dualityFear,
+                    hopeEarned: result.playerHopeEarned,
+                    fearGen: result.playerFearGenerated,
+                    min: mathStats.min,
+                    max: mathStats.max,
+                    avg: mathStats.avg
+                });
+            }
+        }
+
+        return {
+            dateFrom: this.dateFrom,
+            dateTo: this.dateTo,
+            gm: gmData,
+            players: playersData
+        };
+    }
+
+    _calculateMathStats(totalsMap) {
+        if (!totalsMap || Object.keys(totalsMap).length === 0) {
+            return { min: '-', max: '-', avg: '-' };
+        }
+
+        let min = null;
+        let max = null;
+        let sum = 0;
+        let count = 0;
+
+        for (const [valStr, freq] of Object.entries(totalsMap)) {
+            const val = parseInt(valStr);
+            const frequency = parseInt(freq);
+
+            if (frequency > 0) {
+                if (min === null || val < min) min = val;
+                if (max === null || val > max) max = val;
+                
+                sum += val * frequency;
+                count += frequency;
+            }
+        }
+
+        return {
+            min: min !== null ? min : '-',
+            max: max !== null ? max : '-',
+            avg: count > 0 ? (sum / count).toFixed(1) : '-'
+        };
+    }
+}
+
+//////////////////////////////////////    CHART WINDOW CLASS    //////////////////////////////////////    
 
 class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
     static DEFAULT_OPTIONS = {
@@ -145,7 +266,8 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         },
         actions: {
             toggleSave: ChartWindow._onToggleSave,
-            manageData: ChartWindow._onManageData
+            manageData: ChartWindow._onManageData,
+            openSummary: ChartWindow._onOpenSummary
         }
     };
 
@@ -361,6 +483,36 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
     static _onManageData(event, target) {
         new manageDiceData().render(true);
     }
+    
+    // Updated Action Handler
+    static _onOpenSummary(event, target) {
+        // Removed console logs here
+
+        // 'this' refers to the Application instance when invoked by Foundry actions
+        const appElement = this.element; 
+        
+        if (!appElement) {
+            console.error("DHS | Could not find app element.");
+            return;
+        }
+        
+        const fromVal = appElement.querySelector('#fromdateselect')?.value;
+        const toVal = appElement.querySelector('#todateselect')?.value;
+        
+        // Removed logs here
+
+        if (!fromVal || !toVal) {
+            ui.notifications.warn("Please select a date range first.");
+            return;
+        }
+
+        try {
+            new SummaryWindow({ dateFrom: fromVal, dateTo: toVal }).render(true);
+        } catch (err) {
+            console.error("DHS | Failed to open SummaryWindow:", err);
+            ui.notifications.error("Failed to open summary. Check console.");
+        }
+    }
 
     _getUsersOptions() {
         let usnames = [];
@@ -378,6 +530,8 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         return whichuser;
     }
 }
+
+//////////////////////////////////////    MANAGE DATA CLASS    //////////////////////////////////////
 
 class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
     static DEFAULT_OPTIONS = { 
@@ -906,6 +1060,10 @@ function updatedata(datefrom, dateto, theuser, filterType = 'all') {
         gmFumbles: result.gmFumbles, 
         gmHits: result.gmHits,     
         gmMisses: result.gmMisses, 
+        
+        // Raw Arrays for Math
+        d20Totals: result.d20Totals,
+        dualityTotals: result.dualityTotals,
 
         // Player Stats
         playerHits: result.playerHits,
