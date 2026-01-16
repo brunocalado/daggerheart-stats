@@ -10,6 +10,8 @@ Reviewing the session's dice rolls is a great way to wrap up the night. Addition
 
 <p align="center"><img width="900" src="docs/preview.webp" alt="preview"></p>
 
+<p align="center"><img width="900" src="docs/summary.webp" alt="Summary"></p>
+
 ## 🚀 Key Features
 
 * **Automated Roll Tracking:** Automatically captures and logs D20 rolls, Duality Dice (Hope/Fear), and Critical Successes from chat messages.

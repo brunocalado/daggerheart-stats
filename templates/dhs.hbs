@@ -15,26 +15,26 @@
         {{/if}}
 
         <!-- User Select -->
-        <div class="input-group">
-            <label for="selectuser">User</label>
+        <div class="floating-label-group">
+            <span class="input-label">User</span>
             <select id="selectuser" name="whichusr" class="compact-select"> {{{whichuser}}}</select>
         </div>
         
         <!-- Date From -->
-        <div class="input-group">
-            <label for="fromdateselect">From</label>
+        <div class="floating-label-group">
+            <span class="input-label">From</span>
             <select id="fromdateselect" name="datefrom" class="compact-select"> {{{messagealldatesfrom}}}</select>
         </div>
         
         <!-- Date To -->
-        <div class="input-group">
-            <label for="todateselect">To</label>
+        <div class="floating-label-group">
+            <span class="input-label">To</span>
             <select id="todateselect" name="dateto" class="compact-select">{{{messagealldatesto}}}</select>
         </div>
 
         <!-- Roll Type Filter -->
-        <div class="input-group" id="filter-rolltype-group" style="display: flex;">
-            <label for="filter-rolltype">Type</label>
+        <div class="floating-label-group" id="filter-rolltype-group">
+            <span class="input-label">Type</span>
             <select id="filter-rolltype" class="compact-select">
                 <option value="all">All</option>
                 <option value="action">Action</option>
@@ -44,7 +44,7 @@
 
         <!-- Buttons Group -->
         <div class="input-group" style="justify-content: flex-end; flex-direction: row; gap: 5px;">
-             <!-- Refresh Button (NEW) -->
+             <!-- Refresh Button -->
             <div>
                 <label style="opacity: 0; height: 0; margin: 0; display:block;">Ref</label>
                 <button type="button" data-action="refreshData" class="icon-btn manage-btn" title="Refresh Statistics">
@@ -86,20 +86,28 @@
 
     <!-- Stats Boxes Container -->
     <div class="tablescontainer">
-        <!-- GM Stats Box -->
+        <!-- GM Stats Box (UPDATED to 4 Columns) -->
         <div id="gm-stats-container" class="stat-box" style="display: {{#if isSelectedUserGM}}block{{else}}none{{/if}};">
             
             <div class="dh-stat-grid">
-                <!-- Column 1: Total & Fumbles -->
+                <!-- Column 1: Total D20 Rolls -->
                 <div class="dh-stat-col">
                     <span class="stat-line" title="Total amount of d20 rolls made.">
                         Total D20 Rolls: <span class="stat-value" id="gmD20Count">{{{gmD20Count}}}</span>
                     </span>
-                    <span class="dh-sub-val" title="Number of Critical Successes">Critical Hits: <span id="gmCrits">{{{gmCrits}}}</span></span>
-                    <span class="dh-sub-val" title="Fumbles">Fumbles: <span id="gmFumbles">{{{gmFumbles}}}</span></span>
+                </div>
+
+                <!-- Column 2: Criticals & Fumbles -->
+                <div class="dh-stat-col">
+                    <span class="stat-line" title="Number of Critical Successes">
+                        Critical Hits: <span class="stat-value" id="gmCrits" style="color: #388E3C;">{{{gmCrits}}}</span>
+                    </span>
+                    <span class="stat-line" title="Fumbles (Natural 1)">
+                        Fumbles: <span class="stat-value" id="gmFumbles" style="color: #D32F2F;">{{{gmFumbles}}}</span>
+                    </span>
                 </div>
                 
-                <!-- Column 2: Hits / Misses -->
+                <!-- Column 3: Hits / Misses -->
                 <div class="dh-stat-col">
                     <div class="stat-line" title="Counted only if an action roll was made with a marked target.">
                         Hits: <span class="stat-value" id="gmHits" style="color: #388E3C;">{{{gmHits}}}</span>
@@ -109,7 +117,7 @@
                     </div>
                 </div>
                 
-                <!-- Column 3: Fear Earned / Spent -->
+                <!-- Column 4: Fear Earned / Spent -->
                 <div class="dh-stat-col">
                     <div class="stat-line">
                         Fear Earned: <span class="stat-value" id="gmFearGain" style="color: var(--dh-color-fear);">{{{gmFearGain}}}</span>
@@ -121,7 +129,7 @@
             </div>
         </div>
 
-        <!-- Duality Stats Box (Players) -->
+        <!-- Duality Stats Box (Players) - UPDATED to 4 Columns -->
         <div id="duality-stats-container" class="stat-box" style="display: {{#if isSelectedUserGM}}none{{else}}block{{/if}};">
             
             <div class="dh-stat-grid">
@@ -130,13 +138,19 @@
                     <span class="stat-line">
                         Rolls with Hope: <span class="stat-value" id="dualityHope" style="color: var(--dh-color-hope);">{{{dualityHope}}}</span>
                     </span>
-                    <span class="dh-sub-val" title="Number of Critical Successes">Critical Hits: <span id="dualityCrit">{{{dualityCrit}}}</span></span>
                     <span class="stat-line" style="margin-top: 5px;">
                         Rolls with Fear: <span class="stat-value" id="dualityFear" style="color: var(--dh-color-fear);">{{{dualityFear}}}</span>
                     </span>
                 </div>
 
-                <!-- Column 2: Hits & Miss -->
+                <!-- Column 2: Criticals (Isolated) -->
+                <div class="dh-stat-col">
+                    <span class="stat-line" title="Number of Critical Successes">
+                        Critical Hits: <span class="stat-value" id="dualityCrit" style="color: #4CAF50;">{{{dualityCrit}}}</span>
+                    </span>
+                </div>
+
+                <!-- Column 3: Hits & Miss -->
                 <div class="dh-stat-col">
                     <div class="stat-line" title="Counted only if an action roll was made with a marked target.">
                         Hits: <span class="stat-value" id="playerHits" style="color: #388E3C;">{{{playerHits}}}</span>
@@ -146,7 +160,7 @@
                     </div>
                 </div>
 
-                <!-- Column 3: Hope Earned & Fear Generated -->
+                <!-- Column 4: Hope Earned & Fear Generated -->
                 <div class="dh-stat-col">
                     <div class="stat-line" title="Count of Action Rolls that resulted in Hope or Critical">
                         Hope Earned: <span class="stat-value" id="playerHopeEarned" style="color: var(--dh-color-hope);">{{{playerHopeEarned}}}</span>

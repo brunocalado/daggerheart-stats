@@ -140,13 +140,13 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         tag: "div",
         classes: ["dhs-summary-scope"], // Isolated CSS scope class
         window: {
-            title: "Daggerheart: Session Summary",
+            title: "Daggerheart: Summary",
             icon: "fas fa-clipboard-list",
             resizable: true,
             contentClasses: ["summary-content"]
         },
         position: {
-            width: 900, // Slightly wider for badges
+            width: 900,
             height: "auto"
         }
     };
@@ -163,6 +163,9 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         const users = game.users.contents;
         let gmData = null;
         let playersData = [];
+        
+        // Create period string once to inject directly
+        const periodString = `${this.dateFrom} - ${this.dateTo}`;
 
         // 1. Gather Data
         for (const user of users) {
@@ -174,7 +177,8 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                 gmData = {
                     name: user.name,
                     color: user.color,
-                    totalD20: result.gmD20Count,
+                    // totalD20: result.gmD20Count, // Removed per request
+                    period: periodString, // Injected here to ensure availability
                     crits: result.gmCrits,
                     fumbles: result.gmFumbles,
                     hits: result.gmHits,
@@ -183,13 +187,15 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                     fearSpent: result.gmFearSpend,
                     min: mathStats.min,
                     max: mathStats.max,
-                    avg: mathStats.avg
+                    avg: mathStats.avg,
+                    totalD20: result.gmD20Count // Kept for count stat
                 };
             } else {
                 mathStats = this._calculateMathStats(result.dualityTotals);
                 playersData.push({
                     name: user.name,
                     color: user.color,
+                    period: periodString,
                     hopeRolls: result.dualityHope, 
                     crits: result.dualityCrit,
                     hits: result.playerHits,
