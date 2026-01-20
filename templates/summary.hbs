@@ -8,17 +8,17 @@
             <span style="font-size: 0.8em;">Period: {{gm.period}}</span>
         </h3>
         <div class="gm-grid">
-            <div class="gm-stat"><label>Crit</label><span style="color: #4CAF50;">{{gm.crits}}</span></div>
-            <div class="gm-stat"><label>Fumble</label><span style="color: #D32F2F;">{{gm.fumbles}}</span></div>
-            <div class="gm-stat"><label>Hits</label><span>{{gm.hits}}</span></div>
-            <div class="gm-stat"><label>Misses</label><span>{{gm.misses}}</span></div>
-            <div class="gm-stat"><label>Avg</label><span>{{gm.avg}}</span></div>
+            <div class="gm-stat"><label>Crit:</label><span>{{gm.crits}}</span></div>
+            <div class="gm-stat"><label>Fumble:</label><span>{{gm.fumbles}}</span></div>
+            <div class="gm-stat"><label>Hits:</label><span>{{gm.hits}}</span></div>
+            <div class="gm-stat"><label>Misses:</label><span>{{gm.misses}}</span></div>
+            <div class="gm-stat"><label>Avg:</label><span>{{gm.avg}}</span></div>
             
-            <div class="gm-stat"><label>Fear +</label><span style="color: var(--dh-color-fear);">{{gm.fearEarned}}</span></div>
-            <div class="gm-stat"><label>Fear -</label><span style="color: var(--dh-color-gold);">{{gm.fearSpent}}</span></div>
-            <div class="gm-stat"><label>Min</label><span>{{gm.min}}</span></div>
-            <div class="gm-stat"><label>Max</label><span>{{gm.max}}</span></div>
-            <div class="gm-stat"><label>Count</label><span>{{gm.totalD20}}</span></div>
+            <div class="gm-stat"><label>Fear +:</label><span>{{gm.fearEarned}}</span></div>
+            <div class="gm-stat"><label>Fear -:</label><span>{{gm.fearSpent}}</span></div>
+            <div class="gm-stat"><label>Min:</label><span>{{gm.min}}</span></div>
+            <div class="gm-stat"><label>Max:</label><span>{{gm.max}}</span></div>
+            <div class="gm-stat"><label>Count:</label><span>{{gm.totalD20}}</span></div>
         </div>
     </div>
     {{/if}}
@@ -45,18 +45,18 @@
 
             <div class="player-stats-grid">
                 <!-- Row 1 -->
-                <div class="p-stat"><label>Hope Rolls</label><span class="stat-val-hope">{{this.hopeRolls}}</span></div>
-                <div class="p-stat"><label>Crits</label><span style="color: #4CAF50;">{{this.crits}}</span></div>
-                <div class="p-stat"><label>Hits</label><span>{{this.hits}}</span></div>
-                <div class="p-stat"><label>Misses</label><span>{{this.misses}}</span></div>
-                <div class="p-stat"><label>Avg Roll</label><span>{{this.avg}}</span></div>
+                <div class="p-stat"><label>Hope Rolls:</label><span>{{this.hopeRolls}}</span></div>
+                <div class="p-stat"><label>Crits:</label><span>{{this.crits}}</span></div>
+                <div class="p-stat"><label>Hits:</label><span>{{this.hits}}</span></div>
+                <div class="p-stat"><label>Misses:</label><span>{{this.misses}}</span></div>
+                <div class="p-stat"><label>Avg Roll:</label><span>{{this.avg}}</span></div>
                 
                 <!-- Row 2 -->
-                <div class="p-stat"><label>Fear Rolls</label><span class="stat-val-fear">{{this.fearRolls}}</span></div>
-                <div class="p-stat"><label>Hope Earned</label><span class="stat-val-hope">{{this.hopeEarned}}</span></div>
-                <div class="p-stat"><label>Fear Gen</label><span class="stat-val-fear">{{this.fearGen}}</span></div>
-                <div class="p-stat"><label>Min</label><span>{{this.min}}</span></div>
-                <div class="p-stat"><label>Max</label><span>{{this.max}}</span></div>
+                <div class="p-stat"><label>Fear Rolls:</label><span>{{this.fearRolls}}</span></div>
+                <div class="p-stat"><label>Hope Earned:</label><span>{{this.hopeEarned}}</span></div>
+                <div class="p-stat"><label>Fear Gen:</label><span>{{this.fearGen}}</span></div>
+                <div class="p-stat"><label>Min:</label><span>{{this.min}}</span></div>
+                <div class="p-stat"><label>Max:</label><span>{{this.max}}</span></div>
             </div>
         </div>
         {{/each}}
