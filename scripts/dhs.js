@@ -138,7 +138,6 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
     static DEFAULT_OPTIONS = {
         id: "dhs-summary-win",
         tag: "div",
-        // UPDATED: Added dhs-app-window and dhs-summary-ui for CSS scoping
         classes: ["dhs-app-window", "dhs-summary-ui"], 
         window: {
             title: "Daggerheart: Summary",
@@ -330,7 +329,6 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
     static DEFAULT_OPTIONS = {
         id: "dhs-winapp",
         tag: "div",
-        // UPDATED: Added dhs-app-window and dhs-chart-ui for CSS scoping
         classes: ["dhs-app-window", "dhs-chart-ui"],
         window: {
             title: "Daggerheart: Statistics",
@@ -346,7 +344,7 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
             toggleSave: ChartWindow._onToggleSave,
             manageData: ChartWindow._onManageData,
             openSummary: ChartWindow._onOpenSummary,
-            refreshData: ChartWindow._onRefreshData // Nova Ação
+            refreshData: ChartWindow._onRefreshData
         }
     };
 
@@ -369,6 +367,13 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
 
             let datarange = Object.keys(userFlags);
             if (datarange.length === 0) return { hasData: false };
+            
+            // SORT initial date range
+            datarange.sort((a, b) => {
+                let dateA = new Date(a.split('/').reverse().join('-'));
+                let dateB = new Date(b.split('/').reverse().join('-'));
+                return dateA - dateB;
+            });
 
             let whichuser = this._getUsersOptions();
             
@@ -457,21 +462,29 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
 
         if (!userSelect || !fromSelect || !toSelect) return;
 
-        const userVal = userSelect.value;
-        const fromVal = fromSelect.value;
-        const toVal = toSelect.value;
+        let userVal = userSelect.value;
         
-        const typeSelect = html.querySelector("#filter-rolltype");
-        const typeVal = typeSelect ? typeSelect.value : 'all';
-
+        // Handle User Change Logic
         if (event && event.target.id === "selectuser") {
              let dates = populatedates(userVal);
              fromSelect.innerHTML = dates.messagealldatesfrom;
              toSelect.innerHTML = dates.messagealldatesto;
+             
+             // UPDATED: If user changes, auto-select the most recent date (last one) for both fields
+             // This prevents the error where the old date doesn't exist for the new user
              if (toSelect.options.length > 0) {
-                 toSelect.value = toSelect.options[toSelect.options.length - 1].value;
+                 const lastDate = toSelect.options[toSelect.options.length - 1].value;
+                 fromSelect.value = lastDate;
+                 toSelect.value = lastDate;
              }
         }
+        
+        // Grab current values (after potential update above)
+        let fromVal = fromSelect.value;
+        let toVal = toSelect.value;
+        
+        const typeSelect = html.querySelector("#filter-rolltype");
+        const typeVal = typeSelect ? typeSelect.value : 'all';
 
         if (!fromVal || !toVal) return;
 
@@ -616,8 +629,7 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
 class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
     static DEFAULT_OPTIONS = { 
         id: "dhs-winapp-mngdata", 
-        tag: "div",
-        // UPDATED: Added dhs-app-window and dhs-management-ui for CSS scoping 
+        tag: "div", 
         classes: ["dhs-app-window", "dhs-management-ui"], 
         window: { title: "Manage Daggerheart Data", resizable: false }, 
         position: { width: 900, height: "auto" }, 
@@ -670,6 +682,14 @@ class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
         const flags = user.getFlag(FLAG_SCOPE, FLAG_KEY);
         if(!flags) return;
         let alldates = Object.keys(flags);
+        
+        // ADDED SORTING HERE FOR CONSISTENCY
+        alldates.sort((a, b) => {
+            let dateA = new Date(a.split('/').reverse().join('-'));
+            let dateB = new Date(b.split('/').reverse().join('-'));
+            return dateA - dateB;
+        });
+
         for (let date of alldates) {
             let btndate = document.createElement('button'); 
             btndate.innerText = `${date}`; 
@@ -1257,7 +1277,16 @@ function populatedates(user) {
     if (!uObj) return { messagealldatesfrom: "", messagealldatesto: "" };
     let flags = uObj.getFlag(FLAG_SCOPE, FLAG_KEY);
     if(!flags) return { messagealldatesfrom: "", messagealldatesto: "" };
+    
     let alldates = Object.keys(flags);
+    
+    // Sort dates chronologically
+    alldates.sort((a, b) => {
+        let dateA = new Date(a.split('/').reverse().join('-'));
+        let dateB = new Date(b.split('/').reverse().join('-'));
+        return dateA - dateB;
+    });
+
     let opts = '';
     for (let d of alldates) opts += `<option value="${d}">${d}</option>`;
     return { messagealldatesfrom: opts, messagealldatesto: opts }
