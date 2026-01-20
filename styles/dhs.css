@@ -12,6 +12,7 @@
 
 /* --- GLOBAL MODULE WINDOW STYLING --- */
 /* Targets the ApplicationV2 window shell specifically for this module */
+/* REPLACED OLD ID SELECTORS WITH SCOPED CLASS */
 .window-app.dhs-app-window .window-header {
     background: var(--dh-color-text) !important;
     color: var(--dh-color-gold) !important;
@@ -35,7 +36,6 @@
 }
 
 /* --- SHARED COMPONENTS (Scoped to .dhs-app-window) --- */
-/* These rules only apply inside windows with the 'dhs-app-window' class */
 
 /* Buttons & Inputs Scope */
 .dhs-app-window .action-btn {
@@ -55,6 +55,8 @@
 
 .dhs-app-window .action-btn:hover { opacity: 0.9; transform: translateY(-1px); }
 .dhs-app-window .action-btn:active { transform: translateY(0); }
+
+/* Button Colors */
 .dhs-app-window .btn-export { background-color: #5D4037; border: 1px solid #3E2723; } 
 .dhs-app-window .btn-import { background-color: #1976D2; border: 1px solid #0D47A1; } 
 .dhs-app-window .btn-delete { background-color: #D32F2F; border: 1px solid #B71C1C; } 
@@ -260,7 +262,7 @@
     font-family: var(--dh-font-header);
     font-weight: 700;
     font-size: 16px;
-    color: var(--dh-color-text); /* UPDATED: Changed to dark color */
+    color: var(--dh-color-text);
 }
 
 .dhs-management-ui .tag-input {
