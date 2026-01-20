@@ -138,7 +138,8 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
     static DEFAULT_OPTIONS = {
         id: "dhs-summary-win",
         tag: "div",
-        classes: ["dhs-summary-scope"], // Isolated CSS scope class
+        // UPDATED: Added dhs-app-window and dhs-summary-ui for CSS scoping
+        classes: ["dhs-app-window", "dhs-summary-ui"], 
         window: {
             title: "Daggerheart: Summary",
             icon: "fas fa-clipboard-list",
@@ -329,7 +330,8 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
     static DEFAULT_OPTIONS = {
         id: "dhs-winapp",
         tag: "div",
-        classes: ["dhs-chart"],
+        // UPDATED: Added dhs-app-window and dhs-chart-ui for CSS scoping
+        classes: ["dhs-app-window", "dhs-chart-ui"],
         window: {
             title: "Daggerheart: Statistics",
             icon: "fas fa-chart-bar",
@@ -614,8 +616,9 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
 class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
     static DEFAULT_OPTIONS = { 
         id: "dhs-winapp-mngdata", 
-        tag: "div", 
-        classes: ["dhs-management-wrapper"], 
+        tag: "div",
+        // UPDATED: Added dhs-app-window and dhs-management-ui for CSS scoping 
+        classes: ["dhs-app-window", "dhs-management-ui"], 
         window: { title: "Manage Daggerheart Data", resizable: false }, 
         position: { width: 900, height: "auto" }, 
         actions: { 

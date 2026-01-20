@@ -10,22 +10,23 @@
     --dh-font-body: "Inter", sans-serif;
 }
 
-/* --- WINDOW HEADER STYLING (Global for Module) --- */
-.window-app[id^="dhs-"] .window-header {
+/* --- GLOBAL MODULE WINDOW STYLING --- */
+/* Targets the ApplicationV2 window shell specifically for this module */
+.window-app.dhs-app-window .window-header {
     background: var(--dh-color-text) !important;
     color: var(--dh-color-gold) !important;
     font-family: var(--dh-font-header);
     border-bottom: 2px solid var(--dh-color-gold);
 }
 
-.window-app[id^="dhs-"] .window-title {
+.window-app.dhs-app-window .window-title {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
     color: var(--dh-color-gold); 
 }
 
-.window-app[id^="dhs-"] .window-content {
+.window-app.dhs-app-window .window-content {
     background: var(--dh-color-bg) !important; 
     color: var(--dh-color-text);
     font-family: var(--dh-font-body);
@@ -33,60 +34,10 @@
     border-radius: 0 0 4px 4px;
 }
 
-/* --- MANAGEMENT WINDOW SPECIFIC --- */
-.dhs-management-wrapper {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    overflow-y: auto;
-}
+/* --- SHARED COMPONENTS (Scoped to .dhs-app-window) --- */
+/* These rules only apply inside windows with the 'dhs-app-window' class */
 
-/* TABS NAVIGATION */
-.dhs-tabs {
-    display: flex;
-    background-color: var(--dh-color-text);
-    border-bottom: 2px solid var(--dh-color-gold);
-}
-
-.dhs-tab-btn {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: var(--dh-color-gold-dim);
-    font-family: var(--dh-font-header);
-    font-size: 16px;
-    font-weight: 700;
-    text-transform: uppercase;
-    padding: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    border-radius: 0;
-}
-
-.dhs-tab-btn:hover {
-    color: #fff;
-    background: rgba(255,255,255,0.05);
-}
-
-.dhs-tab-btn.active {
-    color: var(--dh-color-gold);
-    background: rgba(193, 154, 86, 0.1);
-    border-bottom: 3px solid var(--dh-color-gold);
-}
-
-/* TAB CONTENT AREAS */
-.tab-content {
-    display: none; 
-    padding: 15px; 
-    flex-direction: column;
-    gap: 15px;
-}
-
-.tab-content.active {
-    display: flex;
-}
-
-.mng-header {
+.dhs-app-window .mng-header {
     font-family: var(--dh-font-header);
     font-size: 18px;
     font-weight: bold;
@@ -99,42 +50,10 @@
     gap: 10px;
 }
 
-.mng-header i { color: var(--dh-color-gold); }
+.dhs-app-window .mng-header i { color: var(--dh-color-gold); }
 
-.user-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    background: rgba(0,0,0,0.03);
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid rgba(0,0,0,0.1);
-}
-
-.user-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #fff;
-    padding: 8px 12px;
-    border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    border: 1px solid transparent;
-    transition: border-color 0.2s;
-}
-
-.user-row:hover { border-color: var(--dh-color-gold); }
-
-.user-name {
-    font-family: var(--dh-font-header);
-    font-weight: 700;
-    font-size: 16px;
-    color: var(--dh-color-text);
-}
-
-.user-actions { display: flex; gap: 8px; }
-
-.action-btn {
+/* Buttons & Inputs Scope */
+.dhs-app-window .action-btn {
     width: 32px;
     height: 32px;
     border: none;
@@ -149,14 +68,115 @@
     box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
-.action-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-.action-btn:active { transform: translateY(0); }
-.btn-export { background-color: #5D4037; border: 1px solid #3E2723; } 
-.btn-import { background-color: #1976D2; border: 1px solid #0D47A1; } 
-.btn-delete { background-color: #D32F2F; border: 1px solid #B71C1C; } 
+.dhs-app-window .action-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.dhs-app-window .action-btn:active { transform: translateY(0); }
+.dhs-app-window .btn-export { background-color: #5D4037; border: 1px solid #3E2723; } 
+.dhs-app-window .btn-import { background-color: #1976D2; border: 1px solid #0D47A1; } 
+.dhs-app-window .btn-delete { background-color: #D32F2F; border: 1px solid #B71C1C; } 
+
+.dhs-app-window .compact-select {
+    width: 100%; 
+    min-width: 100px; 
+    height: 32px;
+    background: #fff;
+    border: 1px solid var(--dh-color-gold);
+    border-radius: 0 0 4px 4px; 
+    font-family: var(--dh-font-body);
+    color: var(--dh-color-text);
+    padding: 0 5px;
+    cursor: pointer;
+    box-sizing: border-box;
+    border-top: none; 
+}
+
+/* --- MANAGEMENT UI SPECIFIC (.dhs-management-ui) --- */
+
+.dhs-management-ui .dhs-management-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow-y: auto;
+}
+
+/* TABS NAVIGATION */
+.dhs-management-ui .dhs-tabs {
+    display: flex;
+    background-color: var(--dh-color-text);
+    border-bottom: 2px solid var(--dh-color-gold);
+}
+
+.dhs-management-ui .dhs-tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--dh-color-gold-dim);
+    font-family: var(--dh-font-header);
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 0;
+}
+
+.dhs-management-ui .dhs-tab-btn:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.05);
+}
+
+.dhs-management-ui .dhs-tab-btn.active {
+    color: var(--dh-color-gold);
+    background: rgba(193, 154, 86, 0.1);
+    border-bottom: 3px solid var(--dh-color-gold);
+}
+
+.dhs-management-ui .tab-content {
+    display: none; 
+    padding: 15px; 
+    flex-direction: column;
+    gap: 15px;
+}
+
+.dhs-management-ui .tab-content.active {
+    display: flex;
+}
+
+.dhs-management-ui .user-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(0,0,0,0.03);
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.dhs-management-ui .user-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    padding: 8px 12px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border: 1px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.dhs-management-ui .user-row:hover { border-color: var(--dh-color-gold); }
+
+.dhs-management-ui .user-name {
+    font-family: var(--dh-font-header);
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--dh-color-text);
+}
+
+.dhs-management-ui .user-actions { display: flex; gap: 8px; }
 
 /* WIPE ALL BUTTON */
-.wipe-all-container {
+.dhs-management-ui .wipe-all-container {
     margin-top: 20px;
     border-top: 1px dashed #D32F2F;
     padding-top: 20px;
@@ -164,7 +184,7 @@
     justify-content: center;
 }
 
-.btn-wipe-all {
+.dhs-management-ui .btn-wipe-all {
     background-color: #B71C1C;
     color: white;
     font-family: var(--dh-font-header);
@@ -180,20 +200,20 @@
     transition: background 0.2s;
 }
 
-.btn-wipe-all:hover {
+.dhs-management-ui .btn-wipe-all:hover {
     background-color: #D32F2F;
     box-shadow: 0 2px 5px rgba(211, 47, 47, 0.4);
 }
 
-.date-controls {
+.dhs-management-ui .date-controls {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-bottom: 10px;
 }
-.date-controls label { font-weight: bold; }
+.dhs-management-ui .date-controls label { font-weight: bold; }
 
-.dates-list-container {
+.dhs-management-ui .dates-list-container {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
@@ -204,7 +224,7 @@
     min-height: 60px;
 }
 
-.date-tag {
+.dhs-management-ui .date-tag {
     background-color: var(--dh-color-text);
     color: var(--dh-color-gold);
     border: 1px solid var(--dh-color-gold);
@@ -219,15 +239,15 @@
     transition: background 0.2s;
 }
 
-.date-tag:hover {
+.dhs-management-ui .date-tag:hover {
     background-color: #000;
     color: #fff;
     text-decoration: line-through; 
 }
 
-/* --- CHART SPECIFIC LAYOUT --- */
+/* --- CHART UI SPECIFIC (.dhs-chart-ui) --- */
 
-.chartdice {
+.dhs-chart-ui .chartdice {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -235,7 +255,7 @@
     padding: 10px; 
 }
 
-.selections-container {
+.dhs-chart-ui .selections-container {
     display: flex;
     flex-direction: row;
     align-items: flex-end; 
@@ -248,7 +268,7 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
-.input-group {
+.dhs-chart-ui .input-group {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -256,46 +276,31 @@
 }
 
 /* Updated Floating Label Group */
-.floating-label-group {
+.dhs-chart-ui .floating-label-group {
     display: flex;
     flex-direction: column;
     min-width: 100px;
-    max-width: 140px; /* Moved constraint here so parent controls width */
-    flex: 1; /* Allow flexible growth within container limits */
+    max-width: 140px; 
+    flex: 1; 
 }
 
-.input-label {
+.dhs-chart-ui .input-label {
     font-family: var(--dh-font-header);
     font-size: 13px; 
     font-weight: 700;
     color: #FFFFFF; 
     background-color: var(--dh-color-text); 
     padding: 2px 8px; 
-    border-radius: 4px 4px 0 0; /* Rounded top only */
+    border-radius: 4px 4px 0 0; 
     text-transform: uppercase;
     border: 1px solid #333; 
-    border-bottom: none; /* Connect to select */
+    border-bottom: none; 
     width: 100%;
     box-sizing: border-box;
     text-align: center;
 }
 
-.compact-select {
-    width: 100%; /* Fill container */
-    min-width: 100px; /* Keep minimum but respect parent max */
-    height: 32px;
-    background: #fff;
-    border: 1px solid var(--dh-color-gold);
-    border-radius: 0 0 4px 4px; /* Rounded bottom only */
-    font-family: var(--dh-font-body);
-    color: var(--dh-color-text);
-    padding: 0 5px;
-    cursor: pointer;
-    box-sizing: border-box;
-    border-top: none; /* Connect to label */
-}
-
-.icon-btn {
+.dhs-chart-ui .icon-btn {
     width: 36px;
     height: 36px;
     padding: 0;
@@ -309,18 +314,18 @@
     transition: all 0.2s ease;
 }
 
-.icon-btn[data-action="toggleSave"] {
+.dhs-chart-ui .icon-btn[data-action="toggleSave"] {
     background: #fff;
     border: 2px solid var(--dh-color-gold-dim);
 }
 
-.manage-btn {
+.dhs-chart-ui .manage-btn {
     font-size: 18px;
     color: var(--dh-color-gold); 
 }
 
 /* Chart Visuals */
-.chart-wrapper {
+.dhs-chart-ui .chart-wrapper {
     display: flex;
     flex-direction: row;
     align-items: flex-end; 
@@ -330,7 +335,7 @@
     padding-bottom: 0px; 
 }
 
-#roll-label {
+.dhs-chart-ui #roll-label {
     writing-mode: vertical-rl;
     text-orientation: mixed;
     transform: rotate(180deg);
@@ -350,7 +355,7 @@
     margin-bottom: 25px;
 }
 
-.chart-content {
+.dhs-chart-ui .chart-content {
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -364,7 +369,7 @@
     max-width: 100%;
 }
 
-.bar-group {
+.dhs-chart-ui .bar-group {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -372,7 +377,7 @@
     flex-shrink: 0;
 }
 
-.bar-container {
+.dhs-chart-ui .bar-container {
     min-width: 16px; 
     width: 18px; 
     height: 180px; 
@@ -382,7 +387,7 @@
     border-radius: 3px 3px 0 0;
 }
 
-.bar {
+.dhs-chart-ui .bar {
     width: 100%;
     transition: height 0.5s ease;
     position: relative;
@@ -392,7 +397,7 @@
     border: 1px solid rgba(0,0,0,0.1);
 }
 
-.bar:hover::after {
+.dhs-chart-ui .bar:hover::after {
     content: attr(data-hover-text);
     position: absolute;
     bottom: 100%;
@@ -413,9 +418,9 @@
     border: 1px solid var(--dh-color-gold);
 }
 
-.bar-number { display: none !important; }
+.dhs-chart-ui .bar-number { display: none !important; }
 
-.dicenlabel {
+.dhs-chart-ui .dicenlabel {
     min-width: 18px; 
     width: 18px; 
     display: flex;
@@ -424,7 +429,7 @@
     margin-top: 5px; 
 }
 
-.bar-label {
+.dhs-chart-ui .bar-label {
     background-color: var(--dh-color-text);
     color: var(--dh-color-gold);
     font-family: var(--dh-font-header);
@@ -439,14 +444,14 @@
 }
 
 /* Stats Structure */
-.stats-separator {
+.dhs-app-window .stats-separator {
     border: 0;
     border-top: 2px solid var(--dh-color-gold);
     margin: 10px 0;
     opacity: 0.5;
 }
 
-.tablescontainer {
+.dhs-chart-ui .tablescontainer {
     display: flex;
     justify-content: center;
     gap: 20px;
@@ -455,7 +460,7 @@
     width: 100%;
 }
 
-.stat-box {
+.dhs-chart-ui .stat-box {
     background-color: #fff;
     border: 1px solid var(--dh-color-gold);
     border-radius: 6px;
@@ -464,20 +469,20 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
-.stat-content {
+.dhs-chart-ui .stat-content {
     display: flex;
     flex-direction: column;
     padding: 5px 0;
 }
 
 /* Grid Layout (3 Columns) */
-.dh-stat-grid {
+.dhs-chart-ui .dh-stat-grid {
     display: flex;
     flex-direction: row;
     width: 100%;
 }
 
-.dh-stat-col {
+.dhs-chart-ui .dh-stat-col {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -492,26 +497,26 @@
     gap: 5px; 
 }
 
-.dh-stat-col:last-child {
+.dhs-chart-ui .dh-stat-col:last-child {
     border-right: none;
 }
 
-.dh-stat-grid * {
+.dhs-chart-ui .dh-stat-grid * {
     color: #000000 !important;
     font-size: 14px !important;
     font-family: var(--dh-font-body) !important;
 }
 
-.dh-stat-grid .stat-value {
+.dhs-chart-ui .dh-stat-grid .stat-value {
     font-weight: 700;
 }
 
-.dh-sub-val {
+.dhs-chart-ui .dh-sub-val {
     margin-top: 2px;
     font-weight: 700; 
 }
 
-.stat-line {
+.dhs-chart-ui .stat-line {
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -519,10 +524,9 @@
     gap: 5px;
 }
 
-/* --- SUMMARY WINDOW ISOLATED STYLES --- */
-/* Everything inside .dhs-summary-scope is isolated */
+/* --- SUMMARY WINDOW UI SPECIFIC (.dhs-summary-ui) --- */
 
-.dhs-summary-scope .summary-content {
+.dhs-summary-ui .summary-content {
     padding: 5px; 
     display: flex;
     flex-direction: column;
@@ -531,7 +535,7 @@
     max-height: 80vh;
 }
 
-.dhs-summary-scope .gm-card {
+.dhs-summary-ui .gm-card {
     background: var(--dh-color-text);
     color: var(--dh-color-gold);
     padding: 15px;
@@ -540,7 +544,7 @@
     box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 
-.dhs-summary-scope .gm-card h3 {
+.dhs-summary-ui .gm-card h3 {
     margin: 0 0 10px 0;
     font-family: var(--dh-font-header);
     border-bottom: 1px solid rgba(193, 154, 86, 0.3);
@@ -549,37 +553,37 @@
     justify-content: space-between;
 }
 
-.dhs-summary-scope .gm-grid {
+.dhs-summary-ui .gm-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 10px;
     text-align: center;
 }
 
-.dhs-summary-scope .gm-stat {
+.dhs-summary-ui .gm-stat {
     display: flex;
     flex-direction: column;
     gap: 2px;
 }
 
-.dhs-summary-scope .gm-stat label {
+.dhs-summary-ui .gm-stat label {
     font-size: 0.8em;
     text-transform: uppercase;
     color: #999;
 }
 
-.dhs-summary-scope .gm-stat span {
+.dhs-summary-ui .gm-stat span {
     font-weight: bold;
     font-size: 1.1em;
 }
 
-.dhs-summary-scope .player-list {
+.dhs-summary-ui .player-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-.dhs-summary-scope .player-card {
+.dhs-summary-ui .player-card {
     background: #fff;
     border: 1px solid var(--dh-color-gold);
     border-radius: 4px;
@@ -589,10 +593,10 @@
 }
 
 /* Updated Player Header for Badges */
-.dhs-summary-scope .player-header {
+.dhs-summary-ui .player-header {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Space name left, badges right */
+    justify-content: space-between; 
     gap: 10px;
     border-bottom: 1px solid rgba(0,0,0,0.1);
     padding-bottom: 5px;
@@ -600,7 +604,7 @@
     min-height: 28px;
 }
 
-.dhs-summary-scope .player-identity {
+.dhs-summary-ui .player-identity {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -610,14 +614,14 @@
     color: #000000;
 }
 
-.dhs-summary-scope .color-dot {
+.dhs-summary-ui .color-dot {
     width: 12px;
     height: 12px;
     border-radius: 50%;
     border: 1px solid rgba(0,0,0,0.2);
 }
 
-.dhs-summary-scope .player-badges {
+.dhs-summary-ui .player-badges {
     display: flex;
     gap: 5px;
     align-items: center;
@@ -625,7 +629,7 @@
     justify-content: flex-end;
 }
 
-.dhs-summary-scope .badge {
+.dhs-summary-ui .badge {
     font-size: 0.7em;
     padding: 2px 8px;
     border-radius: 10px;
@@ -637,22 +641,22 @@
 }
 
 /* Badge Colors based on type */
-.dhs-summary-scope .badge-fear { background-color: #3e2723; color: #ffab91; border-color: #5d4037; } /* Dark Brown/Reddish */
-.dhs-summary-scope .badge-hope { background-color: #e8f5e9; color: #2e7d32; border-color: #a5d6a7; } /* Light Green */
-.dhs-summary-scope .badge-chaos { background-color: #ffebee; color: #c62828; border-color: #ef9a9a; } /* Light Red */
-.dhs-summary-scope .badge-crit { background-color: #fff8e1; color: #f57f17; border-color: #ffe082; } /* Gold/Amber */
-.dhs-summary-scope .badge-hit { background-color: #e3f2fd; color: #1565c0; border-color: #90caf9; } /* Blue */
-.dhs-summary-scope .badge-beacon { background-color: #f3e5f5; color: #7b1fa2; border-color: #ce93d8; } /* Purple */
-.dhs-summary-scope .badge-miss { background-color: #eeeeee; color: #616161; border-color: #bdbdbd; } /* Grey, removed line-through */
+.dhs-summary-ui .badge-fear { background-color: #3e2723; color: #ffab91; border-color: #5d4037; } /* Dark Brown/Reddish */
+.dhs-summary-ui .badge-hope { background-color: #e8f5e9; color: #2e7d32; border-color: #a5d6a7; } /* Light Green */
+.dhs-summary-ui .badge-chaos { background-color: #ffebee; color: #c62828; border-color: #ef9a9a; } /* Light Red */
+.dhs-summary-ui .badge-crit { background-color: #fff8e1; color: #f57f17; border-color: #ffe082; } /* Gold/Amber */
+.dhs-summary-ui .badge-hit { background-color: #e3f2fd; color: #1565c0; border-color: #90caf9; } /* Blue */
+.dhs-summary-ui .badge-beacon { background-color: #f3e5f5; color: #7b1fa2; border-color: #ce93d8; } /* Purple */
+.dhs-summary-ui .badge-miss { background-color: #eeeeee; color: #616161; border-color: #bdbdbd; } /* Grey, removed line-through */
 
-.dhs-summary-scope .player-stats-grid {
+.dhs-summary-ui .player-stats-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 8px;
     font-size: 0.9em;
 }
 
-.dhs-summary-scope .p-stat {
+.dhs-summary-ui .p-stat {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -662,16 +666,16 @@
     border-radius: 4px;
 }
 
-.dhs-summary-scope .p-stat label {
+.dhs-summary-ui .p-stat label {
     font-size: 0.75em;
     color: #666;
     margin-bottom: 2px;
 }
 
-.dhs-summary-scope .p-stat span {
+.dhs-summary-ui .p-stat span {
     font-weight: bold;
     color: var(--dh-color-text);
 }
 
-.dhs-summary-scope .stat-val-hope { color: var(--dh-color-hope) !important; }
-.dhs-summary-scope .stat-val-fear { color: var(--dh-color-fear) !important; }
+.dhs-summary-ui .stat-val-hope { color: var(--dh-color-hope) !important; }
+.dhs-summary-ui .stat-val-fear { color: var(--dh-color-fear) !important; }
