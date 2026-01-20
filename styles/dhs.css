@@ -37,21 +37,6 @@
 /* --- SHARED COMPONENTS (Scoped to .dhs-app-window) --- */
 /* These rules only apply inside windows with the 'dhs-app-window' class */
 
-.dhs-app-window .mng-header {
-    font-family: var(--dh-font-header);
-    font-size: 18px;
-    font-weight: bold;
-    color: var(--dh-color-text);
-    border-bottom: 2px solid var(--dh-color-gold);
-    padding-bottom: 5px;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.dhs-app-window .mng-header i { color: var(--dh-color-gold); }
-
 /* Buttons & Inputs Scope */
 .dhs-app-window .action-btn {
     width: 32px;
