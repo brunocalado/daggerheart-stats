@@ -32,11 +32,17 @@ Reviewing the session's dice rolls is a great way to wrap up the night. Addition
 
 ## 🛠️ How to Use
 
-1. **Access:** Click the "Chart" icon in the Token Controls (left sidebar) or the "Stats" button in the Daggerheart System Menu (right sidebar). You can use a macro too: `DaggerheartStats.Open();`.
+1. **Access:** Click the "Chart" icon in the Token Controls (left sidebar) or the "Stats" button in the Daggerheart System Menu (right sidebar). You can use a macro too: 
+
+```js
+DaggerheartStats.Open();
+```
 
 2. **Recording:** Ensure the "Pause Data Acquisition" setting is OFF (default). The module automatically listens to chat rolls.
 
 3. **Management:** GMs can access the management panel via the "Gear" icon inside the main statistics window to handle data maintenance.
+
+Learn more at [WIKI](https://github.com/brunocalado/daggerheart-stats/wiki)
 
 ## 🚀 Installation
 
