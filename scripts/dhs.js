@@ -4,6 +4,17 @@ const MODULE_ID = "daggerheart-stats";
 const FLAG_SCOPE = MODULE_ID;
 const FLAG_KEY = "d12stats";
 
+// Default Tag Names mapped to their internal keys (Updated to Clear/Succinct English)
+const DEFAULT_TAGS = {
+    fearGen: "Most Fear Generated",      // DM's Best Friend -> deu mais fear para o GM
+    crits: "Most Criticals",             // God Mode -> Quem rolou mais críticos
+    hopeEarned: "Most Hope Earned",      // The Beacon -> Quem ganhou mais hope
+    hits: "Most Hits",                   // The Professional -> Quem acertou mais alvos marcados
+    misses: "Most Misses",               // Stormtrooper -> Quem errou mais alvos marcados
+    hopeRolls: "Most Hope Rolls",        // Good Vibes Only -> Quem rolou mais com hope
+    fearRolls: "Most Fear Rolls"         // Chaos Agent -> Quem rolou mais com fear
+};
+
 let currentFearValue = 0; // Tracks the last known Fear value for GM
 
 function logDebug(...args) {
@@ -167,6 +178,9 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         // Create period string once to inject directly
         const periodString = `${this.dateFrom} - ${this.dateTo}`;
 
+        // Get Tag Names (Custom or Default)
+        const tagNames = game.settings.get(MODULE_ID, 'tagOverrides');
+
         // 1. Gather Data
         for (const user of users) {
             const result = updatedata(this.dateFrom, this.dateTo, user.name, 'all');
@@ -223,13 +237,13 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
 
         // 2. Assign Independent Badges
         findWinners('fearGen').forEach(p => 
-            p.badges.push({ label: "DM's Best Friend", class: "badge-fear", tooltip: "Most Fear Generated" }));
+            p.badges.push({ label: tagNames.fearGen, class: "badge-fear", tooltip: "Most Fear Generated" }));
         
         findWinners('crits').forEach(p => 
-            p.badges.push({ label: "God Mode", class: "badge-crit", tooltip: "Most Critical Successes" }));
+            p.badges.push({ label: tagNames.crits, class: "badge-crit", tooltip: "Most Critical Successes" }));
         
         findWinners('hopeEarned').forEach(p => 
-            p.badges.push({ label: "The Beacon", class: "badge-beacon", tooltip: "Most Hope Earned" }));
+            p.badges.push({ label: tagNames.hopeEarned, class: "badge-beacon", tooltip: "Most Hope Earned" }));
 
         // 3. Assign Mutually Exclusive Group 1: Professional vs Stormtrooper
         // Rule: Winner of Professional CANNOT win Stormtrooper.
@@ -239,7 +253,7 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         const profNames = new Set();
         
         profWinners.forEach(p => {
-            p.badges.push({ label: "The Professional", class: "badge-hit", tooltip: "Most Hits on Target" });
+            p.badges.push({ label: tagNames.hits, class: "badge-hit", tooltip: "Most Hits on Target" });
             profNames.add(p.name);
         });
 
@@ -254,7 +268,7 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
 
         if (maxMisses > 0) {
             playersData.filter(p => !profNames.has(p.name) && p.misses === maxMisses).forEach(p => {
-                p.badges.push({ label: "Stormtrooper", class: "badge-miss", tooltip: "Most Misses on Target" });
+                p.badges.push({ label: tagNames.misses, class: "badge-miss", tooltip: "Most Misses on Target" });
             });
         }
 
@@ -266,7 +280,7 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         const vibeNames = new Set();
 
         vibeWinners.forEach(p => {
-            p.badges.push({ label: "Good Vibes Only", class: "badge-hope", tooltip: "Most Rolls with Hope" });
+            p.badges.push({ label: tagNames.hopeRolls, class: "badge-hope", tooltip: "Most Rolls with Hope" });
             vibeNames.add(p.name);
         });
 
@@ -280,7 +294,7 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
 
         if (maxFearRolls > 0) {
             playersData.filter(p => !vibeNames.has(p.name) && p.fearRolls === maxFearRolls).forEach(p => {
-                p.badges.push({ label: "Chaos Agent", class: "badge-chaos", tooltip: "Most Rolls with Fear" });
+                p.badges.push({ label: tagNames.fearRolls, class: "badge-chaos", tooltip: "Most Rolls with Fear" });
             });
         }
 
@@ -470,8 +484,7 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
              fromSelect.innerHTML = dates.messagealldatesfrom;
              toSelect.innerHTML = dates.messagealldatesto;
              
-             // UPDATED: If user changes, auto-select the most recent date (last one) for both fields
-             // This prevents the error where the old date doesn't exist for the new user
+             // If user changes, auto-select the most recent date
              if (toSelect.options.length > 0) {
                  const lastDate = toSelect.options[toSelect.options.length - 1].value;
                  fromSelect.value = lastDate;
@@ -638,7 +651,9 @@ class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
             importData: manageDiceData._onImport, 
             deleteData: manageDiceData._onDelete, 
             deleteDate: manageDiceData._onDeleteDate,
-            fullWipe: manageDiceData.fullWipe 
+            fullWipe: manageDiceData.fullWipe,
+            saveTags: manageDiceData._onSaveTags,
+            resetTags: manageDiceData._onResetTags
         } 
     };
     
@@ -648,7 +663,20 @@ class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
         const chartWin = new ChartWindow();
         let whichuser = chartWin._getUsersOptions(); 
         let users = game.users.contents;
-        return { whichuser: whichuser, users: users.map(u => ({name: u.name, id: u.id})) };
+        
+        // Prepare Tags List for Edition
+        const currentTags = game.settings.get(MODULE_ID, 'tagOverrides');
+        const editableTags = Object.keys(DEFAULT_TAGS).map(key => ({
+            key: key,
+            default: DEFAULT_TAGS[key],
+            current: currentTags[key] || DEFAULT_TAGS[key]
+        }));
+
+        return { 
+            whichuser: whichuser, 
+            users: users.map(u => ({name: u.name, id: u.id})),
+            tags: editableTags
+        };
     }
     
     _onRender(context, options) {
@@ -702,6 +730,36 @@ class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
         }
     }
     
+    static async _onSaveTags(event, target) {
+        const form = target.closest('.management-section');
+        const inputs = form.querySelectorAll('input.tag-input');
+        const newTags = { ...DEFAULT_TAGS }; // Start with defaults to ensure structure
+
+        inputs.forEach(input => {
+            if (input.name && input.value) {
+                newTags[input.name] = input.value;
+            }
+        });
+
+        await game.settings.set(MODULE_ID, 'tagOverrides', newTags);
+        ui.notifications.info("Daggerheart Stats: Tag names updated successfully.");
+    }
+
+    static async _onResetTags(event, target) {
+        await game.settings.set(MODULE_ID, 'tagOverrides', DEFAULT_TAGS);
+        // Re-render the app to show defaults
+        // Note: ApplicationV2 doesn't have a direct reference to instance here easily without weakmap or searching, 
+        // but since we are changing data, a render request usually follows or we can just close/reopen.
+        // For now, let's try finding the app in the registry or just notifying.
+        // Since we are inside the static context, the simplest way to refresh the UI is just notifying.
+        // If the user switches tabs or re-opens, it will be refreshed.
+        ui.notifications.info("Daggerheart Stats: Tags reset to default.");
+        
+        // Attempt to re-render if we can find the open app window
+        const app = Object.values(ui.windows).find(w => w.id === "dhs-winapp-mngdata");
+        if(app) app.render();
+    }
+
     static _onExport(event, target) { 
         const userName = target.dataset.user; 
         const user = game.users.getName(userName); 
@@ -810,6 +868,15 @@ Hooks.once('init', function () {
     game.settings.register(MODULE_ID, 'allowviewgmstats', { name: 'Players can see GM Stats', hint: 'If enabled, players can select the GM in the User dropdown and view their statistics.', scope: 'world', config: true, type: Boolean, default: true });
     game.settings.register(MODULE_ID, 'pausedataacq', { name: 'Pause the acquisition of data', hint: 'Stop recording new rolls temporarily.', scope: 'world', config: true, type: Boolean, default: false });
     game.settings.register(MODULE_ID, 'debugmode', { name: 'Enable Debug Mode', hint: 'Prints roll detection info to console (F12) for troubleshooting.', scope: 'world', config: true, type: Boolean, default: false });
+    
+    // Register Tags Settings
+    game.settings.register(MODULE_ID, 'tagOverrides', {
+        name: 'Custom Tag Names',
+        scope: 'world',
+        config: false, // Hidden from standard menu
+        type: Object,
+        default: DEFAULT_TAGS
+    });
 });
 
 Hooks.on("ready", function () {

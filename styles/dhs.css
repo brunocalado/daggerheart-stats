@@ -73,6 +73,8 @@
 .dhs-app-window .btn-export { background-color: #5D4037; border: 1px solid #3E2723; } 
 .dhs-app-window .btn-import { background-color: #1976D2; border: 1px solid #0D47A1; } 
 .dhs-app-window .btn-delete { background-color: #D32F2F; border: 1px solid #B71C1C; } 
+.dhs-app-window .btn-save { background-color: #388E3C; border: 1px solid #2E7D32; }
+.dhs-app-window .btn-reset { background-color: #757575; border: 1px solid #616161; }
 
 .dhs-app-window .compact-select {
     width: 100%; 
@@ -243,6 +245,71 @@
     background-color: #000;
     color: #fff;
     text-decoration: line-through; 
+}
+
+/* --- TAG MANAGEMENT STYLES --- */
+
+.dhs-management-ui .tags-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(0,0,0,0.03);
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.dhs-management-ui .tag-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #fff;
+    padding: 8px 12px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border: 1px solid transparent;
+}
+
+.dhs-management-ui .tag-label {
+    flex: 1;
+    font-family: var(--dh-font-header);
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--dh-color-text); /* UPDATED: Changed to dark color */
+}
+
+.dhs-management-ui .tag-input {
+    flex: 2;
+    padding: 5px 8px;
+    border: 1px solid var(--dh-color-gold-dim);
+    border-radius: 4px;
+    font-family: var(--dh-font-body);
+    color: var(--dh-color-text);
+    background: #fdfdfd;
+}
+
+.dhs-management-ui .tag-input:focus {
+    border-color: var(--dh-color-gold);
+    outline: none;
+    background: #fff;
+}
+
+.dhs-management-ui .tags-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.dhs-management-ui .btn-wide {
+    padding: 8px 16px;
+    width: auto;
+    font-family: var(--dh-font-header);
+    font-weight: bold;
+    text-transform: uppercase;
+    gap: 8px;
 }
 
 /* --- CHART UI SPECIFIC (.dhs-chart-ui) --- */

@@ -3,6 +3,7 @@
     <div class="dhs-tabs">
         <button type="button" class="dhs-tab-btn active" data-tab="user-management">User Management</button>
         <button type="button" class="dhs-tab-btn" data-tab="date-management">Date Management</button>
+        <button type="button" class="dhs-tab-btn" data-tab="tags-management">Tags</button>
     </div>
 
     <!-- TAB 1: USER MANAGEMENT -->
@@ -62,6 +63,32 @@
             
             <div id="list-dates">
                 <!-- Buttons injected via JS into .dates-list-container -->
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: TAGS MANAGEMENT -->
+    <div id="tab-tags-management" class="tab-content">
+        <div class="management-section">
+
+            <div class="tags-container">
+                {{#each tags}}
+                <div class="tag-row">
+                    <div class="tag-label" data-tooltip="Default: {{this.default}}">
+                        {{this.default}}
+                    </div>
+                    <input type="text" name="{{this.key}}" class="tag-input" value="{{this.current}}" placeholder="{{this.default}}">
+                </div>
+                {{/each}}
+            </div>
+
+            <div class="tags-actions">
+                <button type="button" class="action-btn btn-reset btn-wide" data-action="resetTags">
+                    <i class="fas fa-undo"></i> Reset
+                </button>
+                <button type="button" class="action-btn btn-save btn-wide" data-action="saveTags">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
             </div>
         </div>
     </div>
