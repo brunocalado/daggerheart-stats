@@ -3,10 +3,10 @@
 <p align="center"><img width="900" src="assets/images/avatar.webp" alt="Avatar"></p>
 
 ## What is it?
-This module tracks all rolls made by the GM and the players. It automatically calculates Fear gains, critical hits, and rolls involving Hope and Fear.
+This module tracks rolls made by the GM (d20) and the players (Duality Dice). It automatically calculates Fear gains, critical hits, and rolls involving Hope and Fear.
 
 ## Why?
-Reviewing the session's dice rolls is a great way to wrap up the night. Additionally, GMs can use this data to spot players who struggled with poor rolls and may need a special moment in the upcoming adventure.
+Reviewing the session's dice rolls is a great way to wrap up the night. Additionally, GMs can use this data to spot players who struggled with poor rolls and may need a special moment in the upcoming session.
 
 <p align="center"><img width="900" src="docs/preview.webp" alt="preview"></p>
 
@@ -14,7 +14,7 @@ Reviewing the session's dice rolls is a great way to wrap up the night. Addition
 
 ## 🚀 Key Features
 
-* **Automated Roll Tracking:** Automatically captures and logs D20 rolls, Duality Dice (Hope/Fear), and Critical Successes from chat messages.
+* **Automated Roll Tracking:** Automatically captures and logs D20 rolls, Duality Dice (Hope/Fear), and Critical Successes.
 
 * **Visual Charts:** Displays an interactive bar chart of roll distributions, allowing users to visualize probability trends.
 
@@ -41,6 +41,8 @@ DaggerheartStats.Open();
 2. **Recording:** Ensure the "Pause Data Acquisition" setting is OFF (default). The module automatically listens to chat rolls.
 
 3. **Management:** GMs can access the management panel via the "Gear" icon inside the main statistics window to handle data maintenance.
+
+<p align="center"><img width="900" src="docs/settings.webp" alt="settings"></p>
 
 Learn more at [WIKI](https://github.com/brunocalado/daggerheart-stats/wiki)
 
@@ -70,6 +72,7 @@ https://raw.githubusercontent.com/brunocalado/daggerheart-stats/refs/heads/main/
 | 🤖 [**Fear Macros**](https://github.com/brunocalado/daggerheart-fear-macros) | Automatically executes macros when the Fear resource is changed. |
 | 😱 [**Fear Tracker**](https://github.com/brunocalado/daggerheart-fear-tracker) | Adds an animated slider bar with configurable fear tokens to the UI. |
 | 🎲 [**Stats**](https://github.com/brunocalado/daggerheart-stats) | Tracks dice rolls from GM and Players. |
+| 🧠 [**Stats Toolbox**](https://github.com/brunocalado/dh-statblock-importer) | Import using a statblock. |
 | 🛒 [**Store**](https://github.com/brunocalado/daggerheart-store) | A dynamic, interactive, and fully configurable store for Foundry VTT. |
 | 📦 [**Extra Content**](https://github.com/brunocalado/daggerheart-extra-content) | Homebrew for Daggerheart. |
 | ⚡ [**Quick Actions**](https://github.com/brunocalado/daggerheart-quickactions) | Quick access to common mechanics like Falling Damage, Downtime, etc. |
