@@ -13,18 +13,30 @@
             <div class="user-list">
                 {{#each users}}
                 <div class="user-row">
-                    <span class="user-name">{{this.name}}</span>
+                    <span class="user-name">{{this.name}}{{#if this.isCurrentGM}} <i class="fas fa-crown gm-crown"></i>{{/if}}</span>
                     <div class="user-actions">
+                        {{#if this.isGM}}
+                        {{#if ../hasMultipleGMs}}
+                        <button type="button" class="action-btn btn-gm {{#if this.isCurrentGM}}btn-current-gm{{/if}}" data-action="setCurrentGM" data-user="{{this.name}}" data-tooltip="Set as Current GM">
+                            <i class="fas fa-crown"></i> Current GM
+                        </button>
+                        {{/if}}
+                        {{/if}}
+
+                        <button type="button" class="action-btn btn-visibility {{#if this.isHidden}}btn-hidden{{/if}}" data-action="toggleVisibility" data-user="{{this.name}}" data-tooltip="Toggle Visibility in Statistics">
+                            <i class="fas {{#if this.isHidden}}fa-eye-slash{{else}}fa-eye{{/if}}"></i> Show
+                        </button>
+
                         <button type="button" class="action-btn btn-export" data-action="exportData" data-user="{{this.name}}" data-tooltip="Export Data">
-                            <i class="fas fa-file-export"></i>
+                            <i class="fas fa-file-export"></i> Export
                         </button>
-                        
+
                         <button type="button" class="action-btn btn-import" data-action="importData" data-user="{{this.name}}" data-tooltip="Import Data (Overwrites)">
-                            <i class="fas fa-file-import"></i>
+                            <i class="fas fa-file-import"></i> Import
                         </button>
-                        
+
                         <button type="button" class="action-btn btn-delete" data-action="deleteData" data-user="{{this.name}}" data-tooltip="Delete All Data">
-                            <i class="fas fa-trash"></i>
+                            <i class="fas fa-trash"></i> Delete
                         </button>
                     </div>
                 </div>

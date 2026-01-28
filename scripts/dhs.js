@@ -171,10 +171,21 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     async _prepareContext(options) {
-        const users = game.users.contents;
+        // Get hidden users list
+        const hiddenUsers = game.settings.get(MODULE_ID, 'hiddenUsers') || [];
+
+        // Get current GM setting
+        let currentGM = game.settings.get(MODULE_ID, 'currentGM') || '';
+        const allGMs = game.users.contents.filter(u => u.isGM);
+        if (!currentGM && allGMs.length > 0) {
+            currentGM = allGMs[0].name;
+        }
+
+        // Filter out hidden users from statistics
+        const users = game.users.contents.filter(u => !hiddenUsers.includes(u.name));
         let gmData = null;
         let playersData = [];
-        
+
         // Create period string once to inject directly
         const periodString = `${this.dateFrom} - ${this.dateTo}`;
 
@@ -185,8 +196,9 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         for (const user of users) {
             const result = updatedata(this.dateFrom, this.dateTo, user.name, 'all');
             let mathStats = { min: '-', max: '-', avg: '-' };
-            
-            if (user.isGM) {
+
+            // Only show GM data for the currentGM
+            if (user.isGM && user.name === currentGM) {
                 mathStats = this._calculateMathStats(result.d20Totals);
                 gmData = {
                     name: user.name,
@@ -204,7 +216,7 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                     avg: mathStats.avg,
                     totalD20: result.gmD20Count // Kept for count stat
                 };
-            } else {
+            } else if (!user.isGM) {
                 mathStats = this._calculateMathStats(result.dualityTotals);
                 playersData.push({
                     name: user.name,
@@ -235,68 +247,27 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
             return playersData.filter(p => p[metric] === max);
         };
 
-        // 2. Assign Independent Badges
-        findWinners('fearGen').forEach(p => 
+        // 2. Assign All Badges Independently (no mutual exclusions)
+        findWinners('fearGen').forEach(p =>
             p.badges.push({ label: tagNames.fearGen, class: "badge-fear", tooltip: "Most Fear Generated" }));
-        
-        findWinners('crits').forEach(p => 
+
+        findWinners('crits').forEach(p =>
             p.badges.push({ label: tagNames.crits, class: "badge-crit", tooltip: "Most Critical Successes" }));
-        
-        findWinners('hopeEarned').forEach(p => 
+
+        findWinners('hopeEarned').forEach(p =>
             p.badges.push({ label: tagNames.hopeEarned, class: "badge-beacon", tooltip: "Most Hope Earned" }));
 
-        // 3. Assign Mutually Exclusive Group 1: Professional vs Stormtrooper
-        // Rule: Winner of Professional CANNOT win Stormtrooper.
-        
-        // A. Assign Professional
-        const profWinners = findWinners('hits');
-        const profNames = new Set();
-        
-        profWinners.forEach(p => {
-            p.badges.push({ label: tagNames.hits, class: "badge-hit", tooltip: "Most Hits on Target" });
-            profNames.add(p.name);
-        });
+        findWinners('hits').forEach(p =>
+            p.badges.push({ label: tagNames.hits, class: "badge-hit", tooltip: "Most Hits on Target" }));
 
-        // B. Assign Stormtrooper (excluding Professionals)
-        let maxMisses = 0;
-        playersData.forEach(p => {
-            // Only consider player if NOT in the Professional list
-            if (!profNames.has(p.name) && p.misses > maxMisses) {
-                maxMisses = p.misses;
-            }
-        });
+        findWinners('misses').forEach(p =>
+            p.badges.push({ label: tagNames.misses, class: "badge-miss", tooltip: "Most Misses on Target" }));
 
-        if (maxMisses > 0) {
-            playersData.filter(p => !profNames.has(p.name) && p.misses === maxMisses).forEach(p => {
-                p.badges.push({ label: tagNames.misses, class: "badge-miss", tooltip: "Most Misses on Target" });
-            });
-        }
+        findWinners('hopeRolls').forEach(p =>
+            p.badges.push({ label: tagNames.hopeRolls, class: "badge-hope", tooltip: "Most Rolls with Hope" }));
 
-        // 4. Assign Mutually Exclusive Group 2: Good Vibes vs Chaos Agent
-        // Rule: Winner of Good Vibes CANNOT win Chaos Agent.
-
-        // A. Assign Good Vibes Only
-        const vibeWinners = findWinners('hopeRolls');
-        const vibeNames = new Set();
-
-        vibeWinners.forEach(p => {
-            p.badges.push({ label: tagNames.hopeRolls, class: "badge-hope", tooltip: "Most Rolls with Hope" });
-            vibeNames.add(p.name);
-        });
-
-        // B. Assign Chaos Agent (excluding Good Vibes winners)
-        let maxFearRolls = 0;
-        playersData.forEach(p => {
-            if (!vibeNames.has(p.name) && p.fearRolls > maxFearRolls) {
-                maxFearRolls = p.fearRolls;
-            }
-        });
-
-        if (maxFearRolls > 0) {
-            playersData.filter(p => !vibeNames.has(p.name) && p.fearRolls === maxFearRolls).forEach(p => {
-                p.badges.push({ label: tagNames.fearRolls, class: "badge-chaos", tooltip: "Most Rolls with Fear" });
-            });
-        }
+        findWinners('fearRolls').forEach(p =>
+            p.badges.push({ label: tagNames.fearRolls, class: "badge-chaos", tooltip: "Most Rolls with Fear" }));
 
         return {
             dateFrom: this.dateFrom,
@@ -622,11 +593,14 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
 
     _getUsersOptions() {
         let usnames = [];
-        
+
+        // Get hidden users list
+        const hiddenUsers = game.settings.get(MODULE_ID, 'hiddenUsers') || [];
+
         if (!game.settings.get(MODULE_ID, 'allowviewgmstats') && !game.user.isGM) {
-            usnames = game.users.contents.filter(u => !u.isGM).map(u => u.name);
+            usnames = game.users.contents.filter(u => !u.isGM && !hiddenUsers.includes(u.name)).map(u => u.name);
         } else {
-            usnames = game.users.contents.map(obj => obj.name);
+            usnames = game.users.contents.filter(u => !hiddenUsers.includes(u.name)).map(obj => obj.name);
         }
 
         let whichuser = '';
@@ -646,14 +620,16 @@ class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
         classes: ["dhs-app-window", "dhs-management-ui"], 
         window: { title: "Manage Daggerheart Data", resizable: false }, 
         position: { width: 900, height: "auto" }, 
-        actions: { 
-            exportData: manageDiceData._onExport, 
-            importData: manageDiceData._onImport, 
-            deleteData: manageDiceData._onDelete, 
+        actions: {
+            exportData: manageDiceData._onExport,
+            importData: manageDiceData._onImport,
+            deleteData: manageDiceData._onDelete,
             deleteDate: manageDiceData._onDeleteDate,
             fullWipe: manageDiceData.fullWipe,
             saveTags: manageDiceData._onSaveTags,
-            resetTags: manageDiceData._onResetTags
+            resetTags: manageDiceData._onResetTags,
+            toggleVisibility: manageDiceData._onToggleVisibility,
+            setCurrentGM: manageDiceData._onSetCurrentGM
         } 
     };
     
@@ -661,9 +637,24 @@ class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
     
     async _prepareContext(options) {
         const chartWin = new ChartWindow();
-        let whichuser = chartWin._getUsersOptions(); 
+        let whichuser = chartWin._getUsersOptions();
         let users = game.users.contents;
-        
+
+        // Get hidden users list
+        const hiddenUsers = game.settings.get(MODULE_ID, 'hiddenUsers') || [];
+
+        // Get current GM setting
+        let currentGM = game.settings.get(MODULE_ID, 'currentGM') || '';
+
+        // If no currentGM is set, default to first GM
+        const allGMs = users.filter(u => u.isGM);
+        if (!currentGM && allGMs.length > 0) {
+            currentGM = allGMs[0].name;
+        }
+
+        // Check if there are multiple GMs
+        const hasMultipleGMs = allGMs.length > 1;
+
         // Prepare Tags List for Edition
         const currentTags = game.settings.get(MODULE_ID, 'tagOverrides');
         const editableTags = Object.keys(DEFAULT_TAGS).map(key => ({
@@ -672,9 +663,16 @@ class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
             current: currentTags[key] || DEFAULT_TAGS[key]
         }));
 
-        return { 
-            whichuser: whichuser, 
-            users: users.map(u => ({name: u.name, id: u.id})),
+        return {
+            whichuser: whichuser,
+            users: users.map(u => ({
+                name: u.name,
+                id: u.id,
+                isHidden: hiddenUsers.includes(u.name),
+                isGM: u.isGM,
+                isCurrentGM: u.name === currentGM
+            })),
+            hasMultipleGMs: hasMultipleGMs,
             tags: editableTags
         };
     }
@@ -748,16 +746,65 @@ class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
     static async _onResetTags(event, target) {
         await game.settings.set(MODULE_ID, 'tagOverrides', DEFAULT_TAGS);
         // Re-render the app to show defaults
-        // Note: ApplicationV2 doesn't have a direct reference to instance here easily without weakmap or searching, 
+        // Note: ApplicationV2 doesn't have a direct reference to instance here easily without weakmap or searching,
         // but since we are changing data, a render request usually follows or we can just close/reopen.
         // For now, let's try finding the app in the registry or just notifying.
         // Since we are inside the static context, the simplest way to refresh the UI is just notifying.
         // If the user switches tabs or re-opens, it will be refreshed.
         ui.notifications.info("Daggerheart Stats: Tags reset to default.");
-        
+
         // Attempt to re-render if we can find the open app window
         const app = Object.values(ui.windows).find(w => w.id === "dhs-winapp-mngdata");
         if(app) app.render();
+    }
+
+    static async _onToggleVisibility(event, target) {
+        const userName = target.dataset.user;
+        const user = game.users.getName(userName);
+        let hiddenUsers = game.settings.get(MODULE_ID, 'hiddenUsers') || [];
+        const currentGM = game.settings.get(MODULE_ID, 'currentGM') || '';
+
+        // Check if trying to hide the current GM
+        if (!hiddenUsers.includes(userName) && userName === currentGM) {
+            ui.notifications.warn("Cannot hide the Current GM.");
+            return;
+        }
+
+        // Check if trying to hide a GM when there's only one visible GM
+        if (!hiddenUsers.includes(userName) && user && user.isGM) {
+            const visibleGMs = game.users.contents.filter(u => u.isGM && !hiddenUsers.includes(u.name));
+            if (visibleGMs.length <= 1) {
+                ui.notifications.warn("Cannot hide the only visible GM.");
+                return;
+            }
+        }
+
+        if (hiddenUsers.includes(userName)) {
+            // Remove from hidden list (show user)
+            hiddenUsers = hiddenUsers.filter(name => name !== userName);
+        } else {
+            // Add to hidden list (hide user)
+            hiddenUsers.push(userName);
+        }
+
+        await game.settings.set(MODULE_ID, 'hiddenUsers', hiddenUsers);
+
+        // Re-render using 'this' context from ApplicationV2 action
+        this.render();
+    }
+
+    static async _onSetCurrentGM(event, target) {
+        const userName = target.dataset.user;
+
+        // If the user is hidden, remove them from hidden list
+        let hiddenUsers = game.settings.get(MODULE_ID, 'hiddenUsers') || [];
+        if (hiddenUsers.includes(userName)) {
+            hiddenUsers = hiddenUsers.filter(name => name !== userName);
+            await game.settings.set(MODULE_ID, 'hiddenUsers', hiddenUsers);
+        }
+
+        await game.settings.set(MODULE_ID, 'currentGM', userName);
+        this.render();
     }
 
     static _onExport(event, target) { 
@@ -876,6 +923,24 @@ Hooks.once('init', function () {
         config: false, // Hidden from standard menu
         type: Object,
         default: DEFAULT_TAGS
+    });
+
+    // Register Hidden Users Setting (users hidden from statistics/summary but still tracked)
+    game.settings.register(MODULE_ID, 'hiddenUsers', {
+        name: 'Hidden Users',
+        scope: 'world',
+        config: false,
+        type: Array,
+        default: []
+    });
+
+    // Register Current GM Setting (which GM is displayed as the "active" GM)
+    game.settings.register(MODULE_ID, 'currentGM', {
+        name: 'Current GM',
+        scope: 'world',
+        config: false,
+        type: String,
+        default: ''
     });
 });
 

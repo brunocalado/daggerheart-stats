@@ -2,8 +2,15 @@
   "id": "daggerheart-stats",
   "title": "Daggerheart: Stats",
   "description": "Shows Statistics for Daggerheart dice rolls.",
-  "version": "0.0.6",
-  "authors": [],
+  "version": "0.0.7",
+
+  "authors": [
+    {
+      "name": "Mestre Digital",
+      "url": "https://www.youtube.com/c/MestreDigital",
+      "flags": {}
+    }
+  ],
   
   "relationships": {
     "systems": [
