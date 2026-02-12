@@ -1055,12 +1055,30 @@ Hooks.on("renderDaggerheartMenu", (app, element, data) => {
 
 Hooks.on("createChatMessage", (chatMessage) => {
     if (game.system.id !== 'daggerheart') return;
-    logDebug("Message Created:", chatMessage);
-    if (game.settings.get(MODULE_ID, 'pausedataacq')) return;
+    
+    if (game.settings.get(MODULE_ID, 'debugmode')) {
+        console.log("==============");
+        logDebug("Message Created:", chatMessage);
+        const title = chatMessage.title || chatMessage.system?.title || "N/A";
+        logDebug("Chat Title:", title);
+        let isCrit = false;
+        if (chatMessage.system?.roll) {
+            isCrit = chatMessage.system.roll.isCritical || chatMessage.system.roll.result?.isCritical || false;
+        }
+        if (!isCrit && (chatMessage.content || "").toLowerCase().includes("critical")) isCrit = true;
+        logDebug("Crit?:", isCrit);
+    }
+
+    if (game.settings.get(MODULE_ID, 'pausedataacq')) {
+        if (game.settings.get(MODULE_ID, 'debugmode')) console.log("==============");
+        return;
+    }
+
     const hasSystemRoll = chatMessage.system?.roll !== undefined;
     const hasChatRollClass = (chatMessage.content || "").includes("chat-roll");
-    if (!hasChatRollClass && !hasSystemRoll) { logDebug("Ignored message"); return; }
+    if (!hasChatRollClass && !hasSystemRoll) { logDebug("Ignored message"); if (game.settings.get(MODULE_ID, 'debugmode')) console.log("=============="); return; }
     detectroll(chatMessage);
+    if (game.settings.get(MODULE_ID, 'debugmode')) console.log("==============");
 });
 
 function detectroll(chatMessage) {
@@ -1182,6 +1200,24 @@ function detectroll(chatMessage) {
     } else {
         // Player Logic
         logDebug("Processing Player Roll...");
+
+        // Check for Tag Team Event to avoid duplicates
+        if (CONFIG.DH?.id && CONFIG.DH?.SETTINGS?.gameSettings?.TagTeamRoll) {
+            try {
+                const tagTeamSetting = game.settings.get(CONFIG.DH.id, CONFIG.DH.SETTINGS.gameSettings.TagTeamRoll);
+                const tagTeamMembers = tagTeamSetting?.members || {};
+
+                if (Object.keys(tagTeamMembers).length > 0) {
+                    const msgTitle = chatMessage.title || chatMessage.system?.title || "";
+                    if (msgTitle !== "Tag Team Roll") {
+                        logDebug("Ignored roll due to active Tag Team event (waiting for final result).");
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.warn("DHS | Error checking Tag Team status:", err);
+            }
+        }
 
         let isActionRoll = false; // Flag to determine if current roll is Action to validate Hits/Miss
 
