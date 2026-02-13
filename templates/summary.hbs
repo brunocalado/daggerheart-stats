@@ -41,7 +41,12 @@
 
             <!-- Col 1: Identity (Centered Name) -->
             <div class="player-identity">
-                <div class="player-name">{{this.name}}</div>
+                <div class="identity-wrapper">
+                    <div class="player-name">{{this.name}}</div>
+                    {{#if this.actorName}}
+                    <div class="player-actor">{{this.actorName}}</div>
+                    {{/if}}
+                </div>
             </div>
 
             <!-- Col 2: Resources (Pills) -->

@@ -293,6 +293,28 @@
     height: 100%;
 }
 
+.dhs-summary-ui .identity-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    overflow: hidden;
+}
+
+.dhs-summary-ui .player-actor {
+    font-family: var(--dh-font-body);
+    font-size: 0.75em;
+    color: #666;
+    font-weight: 600;
+    margin-top: 2px;
+    text-transform: uppercase;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
 /* Absolute positioning for full height bar */
 .dhs-summary-ui .color-bar {
     position: absolute;

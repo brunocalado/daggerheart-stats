@@ -251,6 +251,7 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                 mathStats = this._calculateMathStats(result.dualityTotals);
                 playersData.push({
                     name: user.name,
+                    actorName: user.character?.name || null,
                     color: user.color,
                     period: periodString,
                     hopeRolls: result.dualityHope, 
@@ -280,13 +281,13 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
 
         // 2. Assign All Badges Independently (no mutual exclusions)
         findWinners('fearGen').forEach(p =>
-            p.badges.push({ label: tagNames.fearGen, icon: tagIcons.fearGen, class: "badge-fear", tooltip: "Most Fear Generated" }));
+            p.badges.push({ label: tagNames.fearGen, icon: tagIcons.fearGen, class: "badge-fear-gen", tooltip: "Most Fear Generated" }));
 
         findWinners('crits').forEach(p =>
             p.badges.push({ label: tagNames.crits, icon: tagIcons.crits, class: "badge-crit", tooltip: "Most Critical Successes" }));
 
         findWinners('hopeEarned').forEach(p =>
-            p.badges.push({ label: tagNames.hopeEarned, icon: tagIcons.hopeEarned, class: "badge-beacon", tooltip: "Most Hope Earned" }));
+            p.badges.push({ label: tagNames.hopeEarned, icon: tagIcons.hopeEarned, class: "badge-hope-earn", tooltip: "Most Hope Earned" }));
 
         findWinners('hits').forEach(p =>
             p.badges.push({ label: tagNames.hits, icon: tagIcons.hits, class: "badge-hit", tooltip: "Most Hits on Target" }));
@@ -295,10 +296,10 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
             p.badges.push({ label: tagNames.misses, icon: tagIcons.misses, class: "badge-miss", tooltip: "Most Misses on Target" }));
 
         findWinners('hopeRolls').forEach(p =>
-            p.badges.push({ label: tagNames.hopeRolls, icon: tagIcons.hopeRolls, class: "badge-hope", tooltip: "Most Rolls with Hope" }));
+            p.badges.push({ label: tagNames.hopeRolls, icon: tagIcons.hopeRolls, class: "badge-hope-roll", tooltip: "Most Rolls with Hope" }));
 
         findWinners('fearRolls').forEach(p =>
-            p.badges.push({ label: tagNames.fearRolls, icon: tagIcons.fearRolls, class: "badge-chaos", tooltip: "Most Rolls with Fear" }));
+            p.badges.push({ label: tagNames.fearRolls, icon: tagIcons.fearRolls, class: "badge-fear-roll", tooltip: "Most Rolls with Fear" }));
 
         return {
             dateFrom: this.dateFrom,
