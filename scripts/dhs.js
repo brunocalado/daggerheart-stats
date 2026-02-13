@@ -15,6 +15,29 @@ const DEFAULT_TAGS = {
     fearRolls: "Most Fear Rolls"         // Chaos Agent -> Who rolled the most with fear
 };
 
+const DEFAULT_TAG_ICONS = {
+    fearGen: "fas fa-ghost",
+    crits: "fas fa-star",
+    hopeEarned: "fas fa-sun",
+    hits: "fas fa-swords",
+    misses: "fas fa-wind",
+    hopeRolls: "fas fa-clover",
+    fearRolls: "fas fa-skull"
+};
+
+const AVAILABLE_ICONS = [
+    "fas fa-swords", "fas fa-shield-halved", "fas fa-skull", "fas fa-dragon", "fas fa-fist-raised",
+    "fas fa-bow-arrow", "fas fa-map-location-dot", "fas fa-compass", "fas fa-key", "fas fa-eye",
+    "fas fa-mountain", "fas fa-ghost", "fas fa-hat-wizard", "fas fa-book-sparkles", "fas fa-flask",
+    "fas fa-bolt", "fas fa-sun", "fas fa-moon", "fas fa-crown", "fas fa-feather", "fas fa-mask",
+    "fas fa-hand-holding-heart", "fas fa-music", "fas fa-balance-scale", "fas fa-trophy", "fas fa-gem",
+    "fas fa-hammer", "fas fa-leaf", "fas fa-anchor", "fas fa-star", "fas fa-dagger", "fas fa-wand-sparkles",
+    "fas fa-scroll", "fas fa-coins", "fas fa-dice", "fas fa-fire", "fas fa-snowflake", "fas fa-droplet",
+    "fas fa-wind", "fas fa-cloud-bolt", "fas fa-brain", "fas fa-hand-fist", "fas fa-person-running",
+    "fas fa-tent", "fas fa-campground", "fas fa-landmark", "fas fa-biohazard", "fas fa-eye-slash",
+    "fas fa-heart-pulse", "fas fa-clover"
+];
+
 let currentFearValue = 0; // Tracks the last known Fear value for GM
 
 function logDebug(...args) {
@@ -191,6 +214,7 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
 
         // Get Tag Names (Custom or Default)
         const tagNames = game.settings.get(MODULE_ID, 'tagOverrides');
+        const tagIcons = game.settings.get(MODULE_ID, 'tagIcons');
 
         // 1. Gather Data
         for (const user of users) {
@@ -249,25 +273,25 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
 
         // 2. Assign All Badges Independently (no mutual exclusions)
         findWinners('fearGen').forEach(p =>
-            p.badges.push({ label: tagNames.fearGen, class: "badge-fear", tooltip: "Most Fear Generated" }));
+            p.badges.push({ label: tagNames.fearGen, icon: tagIcons.fearGen, class: "badge-fear", tooltip: "Most Fear Generated" }));
 
         findWinners('crits').forEach(p =>
-            p.badges.push({ label: tagNames.crits, class: "badge-crit", tooltip: "Most Critical Successes" }));
+            p.badges.push({ label: tagNames.crits, icon: tagIcons.crits, class: "badge-crit", tooltip: "Most Critical Successes" }));
 
         findWinners('hopeEarned').forEach(p =>
-            p.badges.push({ label: tagNames.hopeEarned, class: "badge-beacon", tooltip: "Most Hope Earned" }));
+            p.badges.push({ label: tagNames.hopeEarned, icon: tagIcons.hopeEarned, class: "badge-beacon", tooltip: "Most Hope Earned" }));
 
         findWinners('hits').forEach(p =>
-            p.badges.push({ label: tagNames.hits, class: "badge-hit", tooltip: "Most Hits on Target" }));
+            p.badges.push({ label: tagNames.hits, icon: tagIcons.hits, class: "badge-hit", tooltip: "Most Hits on Target" }));
 
         findWinners('misses').forEach(p =>
-            p.badges.push({ label: tagNames.misses, class: "badge-miss", tooltip: "Most Misses on Target" }));
+            p.badges.push({ label: tagNames.misses, icon: tagIcons.misses, class: "badge-miss", tooltip: "Most Misses on Target" }));
 
         findWinners('hopeRolls').forEach(p =>
-            p.badges.push({ label: tagNames.hopeRolls, class: "badge-hope", tooltip: "Most Rolls with Hope" }));
+            p.badges.push({ label: tagNames.hopeRolls, icon: tagIcons.hopeRolls, class: "badge-hope", tooltip: "Most Rolls with Hope" }));
 
         findWinners('fearRolls').forEach(p =>
-            p.badges.push({ label: tagNames.fearRolls, class: "badge-chaos", tooltip: "Most Rolls with Fear" }));
+            p.badges.push({ label: tagNames.fearRolls, icon: tagIcons.fearRolls, class: "badge-chaos", tooltip: "Most Rolls with Fear" }));
 
         return {
             dateFrom: this.dateFrom,
@@ -657,11 +681,18 @@ class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
 
         // Prepare Tags List for Edition
         const currentTags = game.settings.get(MODULE_ID, 'tagOverrides');
-        const editableTags = Object.keys(DEFAULT_TAGS).map(key => ({
-            key: key,
-            default: DEFAULT_TAGS[key],
-            current: currentTags[key] || DEFAULT_TAGS[key]
-        }));
+        const currentIcons = game.settings.get(MODULE_ID, 'tagIcons');
+
+        const editableTags = Object.keys(DEFAULT_TAGS).map(key => {
+            const currentIcon = currentIcons[key] || DEFAULT_TAG_ICONS[key];
+            return {
+                key: key,
+                default: DEFAULT_TAGS[key],
+                current: currentTags[key] || DEFAULT_TAGS[key],
+                currentIcon: currentIcon,
+                iconOptions: AVAILABLE_ICONS.map(icon => ({ value: icon, isSelected: icon === currentIcon }))
+            };
+        });
 
         return {
             whichuser: whichuser,
@@ -692,6 +723,40 @@ class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
                 if(content) content.classList.add('active');
             });
         });
+
+        // Icon Picker Logic
+        const iconPickers = this.element.querySelectorAll('.icon-picker-container');
+        
+        iconPickers.forEach(picker => {
+            const trigger = picker.querySelector('.icon-picker-trigger');
+            const input = picker.querySelector('input[type="hidden"]');
+            const options = picker.querySelectorAll('.icon-option');
+
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Close others
+                iconPickers.forEach(p => { if (p !== picker) p.classList.remove('active'); });
+                picker.classList.toggle('active');
+            });
+
+            options.forEach(opt => {
+                opt.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const val = opt.dataset.value;
+                    input.value = val;
+                    
+                    const triggerIcon = trigger.querySelector('i');
+                    triggerIcon.className = val;
+
+                    options.forEach(o => o.classList.remove('selected'));
+                    opt.classList.add('selected');
+
+                    picker.classList.remove('active');
+                });
+            });
+        });
+
+        document.addEventListener('click', (e) => { if (!e.target.closest('.icon-picker-container')) iconPickers.forEach(p => p.classList.remove('active')); });
     }
     
     updateDateList(userName) {
@@ -731,20 +796,29 @@ class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
     static async _onSaveTags(event, target) {
         const form = target.closest('.management-section');
         const inputs = form.querySelectorAll('input.tag-input');
+        const iconInputs = form.querySelectorAll('input.tag-icon-input');
+
         const newTags = { ...DEFAULT_TAGS }; // Start with defaults to ensure structure
+        const newIcons = { ...DEFAULT_TAG_ICONS };
 
         inputs.forEach(input => {
             if (input.name && input.value) {
                 newTags[input.name] = input.value;
             }
         });
+        iconInputs.forEach(input => {
+            const key = input.name.replace('_icon', '');
+            if (key && input.value) newIcons[key] = input.value;
+        });
 
         await game.settings.set(MODULE_ID, 'tagOverrides', newTags);
+        await game.settings.set(MODULE_ID, 'tagIcons', newIcons);
         ui.notifications.info("Daggerheart Stats: Tag names updated successfully.");
     }
 
     static async _onResetTags(event, target) {
         await game.settings.set(MODULE_ID, 'tagOverrides', DEFAULT_TAGS);
+        await game.settings.set(MODULE_ID, 'tagIcons', DEFAULT_TAG_ICONS);
         // Re-render the app to show defaults
         // Note: ApplicationV2 doesn't have a direct reference to instance here easily without weakmap or searching,
         // but since we are changing data, a render request usually follows or we can just close/reopen.
@@ -923,6 +997,14 @@ Hooks.once('init', function () {
         config: false, // Hidden from standard menu
         type: Object,
         default: DEFAULT_TAGS
+    });
+    
+    game.settings.register(MODULE_ID, 'tagIcons', {
+        name: 'Custom Tag Icons',
+        scope: 'world',
+        config: false,
+        type: Object,
+        default: DEFAULT_TAG_ICONS
     });
 
     // Register Hidden Users Setting (users hidden from statistics/summary but still tracked)
