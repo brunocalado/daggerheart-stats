@@ -38,7 +38,7 @@
                 
                 <div class="player-badges">
                     {{#each this.badges}}
-                    <span class="badge {{this.class}}" data-tooltip="{{this.tooltip}}">{{this.label}}</span>
+                    <span class="badge {{this.class}}" data-tooltip="{{this.tooltip}}">{{#if this.icon}}<i class="{{this.icon}}"></i> {{/if}}{{this.label}}</span>
                     {{/each}}
                 </div>
             </div>
