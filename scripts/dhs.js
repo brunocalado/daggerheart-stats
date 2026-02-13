@@ -1215,22 +1215,12 @@ function detectroll(chatMessage) {
         // Player Logic
         logDebug("Processing Player Roll...");
 
-        // Check for Tag Team Event to avoid duplicates
-        if (CONFIG.DH?.id && CONFIG.DH?.SETTINGS?.gameSettings?.TagTeamRoll) {
-            try {
-                const tagTeamSetting = game.settings.get(CONFIG.DH.id, CONFIG.DH.SETTINGS.gameSettings.TagTeamRoll);
-                const tagTeamMembers = tagTeamSetting?.members || {};
-
-                if (Object.keys(tagTeamMembers).length > 0) {
-                    const msgTitle = chatMessage.title || chatMessage.system?.title || "";
-                    if (msgTitle !== "Tag Team Roll") {
-                        logDebug("Ignored roll due to active Tag Team event (waiting for final result).");
-                        return;
-                    }
-                }
-            } catch (err) {
-                console.warn("DHS | Error checking Tag Team status:", err);
-            }
+        // Check for Tag Team Event
+        // Modified: Ignore the combined "Tag Team Roll" and count individual rolls instead.
+        const msgTitle = chatMessage.title || "";
+        if (msgTitle === "Tag Team Roll") {
+            logDebug("Ignored Tag Team Roll combined result (counting individual rolls instead).");
+            return;
         }
 
         let isActionRoll = false; // Flag to determine if current roll is Action to validate Hits/Miss
@@ -1239,7 +1229,7 @@ function detectroll(chatMessage) {
             const r = chatMessage.system.roll;
             const label = r.result?.label;
             const total = r.total;
-            const isCrit = chatMessage.system.roll.isCritical || r.isCritical || r.result?.isCritical || false;
+            const isCrit = chatMessage.system.roll.isCritical || r.result?.isCritical || false;
             
             const isHope = label && label.toLowerCase() === "hope";
             const isFear = label && label.toLowerCase() === "fear";
