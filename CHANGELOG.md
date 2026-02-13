@@ -1,5 +1,6 @@
 # 0.0.8
 - Improved debug
+- Visual alert for player about record on/off
 
 # 0.0.7
 - You can set the current GM (in case you have multiple GMs)

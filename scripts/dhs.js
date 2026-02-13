@@ -6,13 +6,13 @@ const FLAG_KEY = "d12stats";
 
 // Default Tag Names mapped to their internal keys (Updated to Clear/Succinct English)
 const DEFAULT_TAGS = {
-    fearGen: "Most Fear Generated",      // DM's Best Friend -> deu mais fear para o GM
-    crits: "Most Criticals",             // God Mode -> Quem rolou mais críticos
-    hopeEarned: "Most Hope Earned",      // The Beacon -> Quem ganhou mais hope
-    hits: "Most Hits",                   // The Professional -> Quem acertou mais alvos marcados
-    misses: "Most Misses",               // Stormtrooper -> Quem errou mais alvos marcados
-    hopeRolls: "Most Hope Rolls",        // Good Vibes Only -> Quem rolou mais com hope
-    fearRolls: "Most Fear Rolls"         // Chaos Agent -> Quem rolou mais com fear
+    fearGen: "Most Fear Generated",      // DM's Best Friend -> generated most fear for the GM
+    crits: "Most Criticals",             // God Mode -> Who rolled the most criticals
+    hopeEarned: "Most Hope Earned",      // The Beacon -> Who earned the most hope
+    hits: "Most Hits",                   // The Professional -> Who hit the most marked targets
+    misses: "Most Misses",               // Stormtrooper -> Who missed the most marked targets
+    hopeRolls: "Most Hope Rolls",        // Good Vibes Only -> Who rolled the most with hope
+    fearRolls: "Most Fear Rolls"         // Chaos Agent -> Who rolled the most with fear
 };
 
 let currentFearValue = 0; // Tracks the last known Fear value for GM
@@ -588,7 +588,7 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
 
     static _onRefreshData(event, target) {
         this.render(); // Re-render the application to fetch fresh data
-        // Notificação removida conforme solicitado
+        // Notification removed as requested
     }
 
     _getUsersOptions() {
@@ -964,6 +964,14 @@ Hooks.on("ready", function () {
 
 Hooks.on('updateSetting', (setting, changes) => {
     if (game.system.id !== 'daggerheart') return;
+
+    if (setting.key === `${MODULE_ID}.pausedataacq`) {
+        Object.values(ui.windows).forEach(app => {
+            if (app.id === "dhs-winapp") app.render();
+        });
+        return;
+    }
+
     if (setting.key !== 'daggerheart.ResourcesFear') return;
     
     if (!game.user.isGM) return; 
