@@ -26,6 +26,7 @@ const DEFAULT_TAG_ICONS = {
 };
 
 const AVAILABLE_ICONS = [
+    "",
     "fas fa-shield-halved", "fas fa-skull", "fas fa-dragon", "fas fa-hand-fist",
     "fas fa-map-location-dot", "fas fa-compass", "fas fa-key", "fas fa-eye",
     "fas fa-mountain", "fas fa-ghost", "fas fa-hat-wizard", "fas fa-book", "fas fa-flask",
@@ -690,7 +691,7 @@ class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
         const currentIcons = game.settings.get(MODULE_ID, 'tagIcons');
 
         const editableTags = Object.keys(DEFAULT_TAGS).map(key => {
-            const currentIcon = currentIcons[key] || DEFAULT_TAG_ICONS[key];
+            const currentIcon = currentIcons[key] !== undefined ? currentIcons[key] : DEFAULT_TAG_ICONS[key];
             return {
                 key: key,
                 default: DEFAULT_TAGS[key],
