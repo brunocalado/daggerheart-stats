@@ -1066,7 +1066,14 @@ Hooks.on("createChatMessage", (chatMessage) => {
             isCrit = chatMessage.system.roll.isCritical || chatMessage.system.roll.result?.isCritical || false;
         }
         if (!isCrit && (chatMessage.content || "").toLowerCase().includes("critical")) isCrit = true;
-        logDebug("Crit?:", isCrit);
+        logDebug("system.roll.isCritical:", chatMessage.system?.roll?.isCritical);
+        logDebug("system.roll.result.isCritical:", chatMessage.system?.roll?.result?.isCritical);
+        logDebug("system.isGM:", chatMessage.system?.isGM);
+        logDebug("type:", chatMessage.type);
+        logDebug("system.roll.type:", chatMessage.system?.roll?.type);
+        logDebug("system.roll.success:", chatMessage.system?.roll?.success);
+        logDebug("system.hasTarget:", chatMessage.system?.hasTarget);
+        logDebug("system.roll.result.label:", chatMessage.system?.roll?.result?.label);
     }
 
     if (game.settings.get(MODULE_ID, 'pausedataacq')) {
@@ -1153,11 +1160,11 @@ function detectroll(chatMessage) {
              const sysRoll = chatMessage.system.roll;
              const hasD20 = sysRoll.dice?.some(d => d.dice === "d20" || (d.formula && d.formula.includes("d20")));
              const isD20Title = (chatMessage.title === "D20 Roll") || (chatMessage.system.title === "D20 Roll");
-             const formulaHasD20 = sysRoll.formula && sysRoll.formula.includes("d20");
+             const isAdversary = sysRoll.type === "adversaryRoll";
 
-             if (hasD20 || isD20Title || formulaHasD20) {
+             if ((hasD20 || isD20Title) && isAdversary) {
                  logDebug("Found System Data (system.roll).");
-                 const isCrit = sysRoll.isCritical === true;
+                 const isCrit = sysRoll.isCritical === true || sysRoll.result?.isCritical === true;
                  
                  // CHECK FOR FUMBLES (Total 1 on dice[0])
                  if (sysRoll.dice && sysRoll.dice.length > 0 && sysRoll.dice[0].total === 1) {
@@ -1184,7 +1191,6 @@ function detectroll(chatMessage) {
 
              if (diceCount > 0) {
                  let isCrit = false;
-                 div.querySelectorAll('.roll-result-desc').forEach(desc => { if (desc.textContent.toLowerCase().includes("critical")) isCrit = true; });
                  
                  if (d20Dice.length > 0) {
                      const valContainer = div.querySelector('.roll-result-value');
@@ -1225,7 +1231,7 @@ function detectroll(chatMessage) {
             const r = chatMessage.system.roll;
             const label = r.result?.label;
             const total = r.total;
-            const isCrit = chatMessage.system.roll.isCritical || r.isCritical || false;
+            const isCrit = chatMessage.system.roll.isCritical || r.isCritical || r.result?.isCritical || false;
             
             const isHope = label && label.toLowerCase() === "hope";
             const isFear = label && label.toLowerCase() === "fear";
