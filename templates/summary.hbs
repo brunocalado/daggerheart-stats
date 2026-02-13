@@ -36,9 +36,11 @@
         {{#each players}}
         <div class="player-row">
             
-            <!-- Col 1: Identity -->
+            <!-- Absolute Color Bar (Top to Bottom) -->
+            <div class="color-bar" style="background-color: {{this.color}};"></div>
+
+            <!-- Col 1: Identity (Centered Name) -->
             <div class="player-identity">
-                <div class="color-bar" style="background-color: {{this.color}};"></div>
                 <div class="player-name">{{this.name}}</div>
             </div>
 

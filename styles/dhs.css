@@ -266,33 +266,43 @@
 
 /* Player Card (White & Clean) */
 .dhs-summary-ui .player-row {
+    position: relative; /* Allows absolute positioning of children like color-bar */
     background-color: var(--dhs-player-bg);
     border-bottom: 4px solid var(--dhs-bg-dark); /* Gap effect */
-    padding: 12px;
+    padding: 10px 10px 10px 20px; /* Reduced vertical padding, left padding for spacing from bar */
     display: grid;
-    /* Grid Update: Name (140px), Stats (Compact), Badges (Large 1fr) */
-    grid-template-columns: 140px 90px 90px 110px 1fr;
+    /* Grid Columns unchanged */
+    grid-template-columns: 115px 105px 105px 125px 1fr;
     gap: 10px;
     align-items: center;
-    /* Force Fixed Height & Prevent Expansion */
-    height: 82px;
-    max-height: 82px;
-    overflow: hidden;
+    /* Fixed Height enforced */
+    height: 96px; 
+    max-height: 96px;
+    
+    /* CORREÇÃO DO FUNDO VAZANDO */
+    border-radius: 6px; /* A curva é definida aqui no pai */
+    overflow: hidden;   /* Corta tudo que passar da curva (incluindo a barra) */
 }
 
 .dhs-summary-ui .player-identity {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: center; /* Centers name horizontally */
     white-space: nowrap;
     overflow: hidden;
+    height: 100%;
 }
 
+/* Absolute positioning for full height bar */
 .dhs-summary-ui .color-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
     width: 6px;
-    height: 32px;
-    border-radius: 2px;
-    flex-shrink: 0;
+    z-index: 1;
+    /* REMOVIDO border-radius: Deixe o pai cortar a barra */
+    border-radius: 0; 
 }
 
 .dhs-summary-ui .player-name {
@@ -385,7 +395,7 @@
 }
 
 .dhs-summary-ui .badge {
-    font-size: 8.5px; /* Slightly reduced to fit more */
+    font-size: 8.5px; 
     padding: 2px 6px;
     border-radius: 4px;
     font-weight: 900;
@@ -398,11 +408,10 @@
 }
 
 /* HIGH CONTRAST BADGES */
-.dhs-summary-ui .badge-fear-gen { background-color: #5d4037; color: #fff; } /* Brown (Good contrast) */
-/* Update: Darkened text significantly for purple badge */
-.dhs-summary-ui .badge-hope-earn, .dhs-summary-ui .badge-beacon { background-color: #f3e8ff; color: #4c1d95; border: 1px solid #d8b4fe; } 
+.dhs-summary-ui .badge-fear-gen { background-color: #5d4037; color: #fff; } /* Brown */
+/* Updated: Much higher contrast for Purple Badge */
+.dhs-summary-ui .badge-hope-earn, .dhs-summary-ui .badge-beacon { background-color: #f3e8ff; color: #3b0764; border: 1px solid #d8b4fe; } 
 .dhs-summary-ui .badge-hope-roll, .dhs-summary-ui .badge-hope { background-color: #dcfce7; color: #14532d; border: 1px solid #86efac; } /* Darker Green Text */
 .dhs-summary-ui .badge-fear-roll, .dhs-summary-ui .badge-chaos, .dhs-summary-ui .badge-fear { background-color: #fee2e2; color: #7f1d1d; border: 1px solid #fca5a5; } /* Darker Red Text */
 .dhs-summary-ui .badge-crit { background-color: #fff8e1; color: #b45309; border: 1px solid #ffe082; } /* Darker Orange/Gold Text */
-/* Update: Darkened text significantly for grey badge */
 .dhs-summary-ui .badge-hit, .dhs-summary-ui .badge-miss { background-color: #e5e7eb; color: #111827; border: 1px solid #d1d5db; }
