@@ -720,15 +720,35 @@ class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
         const select = this.element.querySelector('#select-usertomanage');
         if(select) { this.updateDateList(select.value); select.addEventListener('change', (e) => this.updateDateList(e.target.value)); }
         
+        // Restore Last Active Tab
+        const lastTab = game.settings.get(MODULE_ID, 'lastManageTab');
+        if (lastTab) {
+            const activeBtn = this.element.querySelector(`.dhs-tab-btn[data-tab="${lastTab}"]`);
+            const activeContent = this.element.querySelector(`#tab-${lastTab}`);
+            
+            if (activeBtn && activeContent) {
+                // Deactivate defaults (usually first one is hardcoded active in HBS)
+                this.element.querySelectorAll('.dhs-tab-btn').forEach(b => b.classList.remove('active'));
+                this.element.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Activate saved
+                activeBtn.classList.add('active');
+                activeContent.classList.add('active');
+            }
+        }
+
         const tabBtns = this.element.querySelectorAll('.dhs-tab-btn');
         tabBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', async (e) => {
                 tabBtns.forEach(b => b.classList.remove('active'));
                 this.element.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                 e.target.classList.add('active');
                 const tabId = e.target.dataset.tab;
                 const content = this.element.querySelector(`#tab-${tabId}`);
                 if(content) content.classList.add('active');
+                
+                // Save state
+                await game.settings.set(MODULE_ID, 'lastManageTab', tabId);
             });
         });
 
@@ -1031,6 +1051,15 @@ Hooks.once('init', function () {
         config: false,
         type: String,
         default: ''
+    });
+
+    // Register Last Manage Tab (For UX Memory)
+    game.settings.register(MODULE_ID, 'lastManageTab', {
+        name: 'Last Manage Tab',
+        scope: 'client',
+        config: false,
+        type: String,
+        default: 'manage-data'
     });
 });
 

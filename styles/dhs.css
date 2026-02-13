@@ -287,17 +287,18 @@
 .dhs-summary-ui .player-identity {
     display: flex;
     align-items: center;
-    justify-content: center; /* Centers name horizontally */
+    justify-content: flex-start; /* Alinhado à esquerda */
     white-space: nowrap;
     overflow: hidden;
     height: 100%;
+    padding-left: 5px; /* Pequeno respiro da barra lateral */
 }
 
 .dhs-summary-ui .identity-wrapper {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; /* Alinhado à esquerda */
     width: 100%;
     overflow: hidden;
 }
@@ -407,10 +408,18 @@
 .dhs-summary-ui .player-badges {
     display: flex;
     gap: 4px;
-    align-items: flex-start;
-    align-content: flex-start;
+    
+    /* Centralização Total (Horizontal e Vertical) */
+    align-items: center;
+    align-content: center;
     flex-wrap: wrap;
-    justify-content: flex-end;
+    justify-content: center;
+
+    /* Fundo Sutil para indicar "Tag Zone" */
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 6px;
+    padding: 4px;
+
     /* Contain badges to prevent row expansion */
     height: 100%;
     overflow: hidden;
