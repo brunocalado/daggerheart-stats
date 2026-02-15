@@ -340,6 +340,335 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 }
 
+//////////////////////////////////////    TRENDS WINDOW CLASS    //////////////////////////////////////
+
+class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
+        constructor(options = {}) {
+            super(options);
+            this.dateFrom = options.dateFrom;
+            this.dateTo = options.dateTo;
+            this.selectedUser = null;
+            this.selectedMetric = null;
+            this.chart = null;
+        }
+
+        static DEFAULT_OPTIONS = {
+            id: "dhs-trends-win",
+            tag: "div",
+            classes: ["dhs-app-window", "dhs-trends-ui"],
+            window: {
+                title: "Daggerheart: Trends",
+                icon: "fas fa-chart-line",
+                resizable: true,
+                contentClasses: ["trends-content"]
+            },
+            position: {
+                width: 1000,
+                height: 650
+            }
+        };
+
+        static get PARTS() {
+            return {
+                content: {
+                    template: `modules/${MODULE_ID}/templates/trends.hbs`,
+                }
+            };
+        }
+
+        async _prepareContext(options) {
+            const context = await super._prepareContext(options);
+
+            // Format period display (dateFrom/dateTo are in DD/MM/YYYY format)
+            context.period = `${this.dateFrom} - ${this.dateTo}`;
+
+            // Get all users (GM and players)
+            context.users = [];
+            for (let user of game.users) {
+                const isHidden = user.getFlag(FLAG_SCOPE, 'hideFromStats') || false;
+                if (!isHidden) {
+                    context.users.push({
+                        name: user.name,
+                        isGM: user.isGM
+                    });
+                }
+            }
+
+            return context;
+        }
+
+        _onRender(context, options) {
+            super._onRender(context, options);
+
+            // Load Chart.js if not already loaded
+            this._loadChartJS().then(() => {
+                this._attachEventListeners();
+            });
+        }
+
+        async _loadChartJS() {
+            if (typeof Chart !== 'undefined') return;
+
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        _attachEventListeners() {
+            const userButtons = this.element.querySelectorAll('.trends-user-btn');
+            userButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => this._onUserSelect(e));
+            });
+        }
+
+        _onUserSelect(event) {
+            const button = event.currentTarget;
+            const userName = button.dataset.user;
+            const isGM = button.dataset.isGm === 'true';
+
+            // Update active button
+            this.element.querySelectorAll('.trends-user-btn').forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+
+            this.selectedUser = userName;
+            this.selectedMetric = null;
+
+            // Update metric buttons based on user type
+            this._updateMetricButtons(isGM);
+        }
+
+        _updateMetricButtons(isGM) {
+            const container = this.element.querySelector('#trends-metric-buttons');
+            container.innerHTML = '';
+
+            let metrics = [];
+            if (isGM) {
+                metrics = [
+                    { key: 'rolls', label: 'Rolls' },
+                    { key: 'crits', label: 'Crits' },
+                    { key: 'fumbles', label: 'Fumbles' },
+                    { key: 'hits', label: 'Hits' },
+                    { key: 'misses', label: 'Misses' },
+                    { key: 'min', label: 'Min' },
+                    { key: 'max', label: 'Max' },
+                    { key: 'avg', label: 'Avg' },
+                    { key: 'count', label: 'Count' },
+                    { key: 'fearEarned', label: 'Fear Earned' },
+                    { key: 'fearSpent', label: 'Fear Spent' }
+                ];
+            } else {
+                metrics = [
+                    { key: 'crits', label: 'Crits' },
+                    { key: 'hits', label: 'Hits' },
+                    { key: 'misses', label: 'Misses' },
+                    { key: 'min', label: 'Min' },
+                    { key: 'max', label: 'Max' },
+                    { key: 'avg', label: 'Avg' },
+                    { key: 'hopeRolls', label: 'Hope Rolls' },
+                    { key: 'fearRolls', label: 'Fear Rolls' },
+                    { key: 'hopeGain', label: 'Hope Gain' },
+                    { key: 'fearGen', label: 'Fear Gen' }
+                ];
+            }
+
+            metrics.forEach(metric => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'trends-metric-btn';
+                btn.textContent = metric.label;
+                btn.dataset.metric = metric.key;
+                btn.addEventListener('click', (e) => this._onMetricSelect(e));
+                container.appendChild(btn);
+            });
+        }
+
+        _onMetricSelect(event) {
+            const button = event.currentTarget;
+            const metric = button.dataset.metric;
+
+            // Update active button
+            this.element.querySelectorAll('.trends-metric-btn').forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+
+            this.selectedMetric = metric;
+
+            // Render chart
+            this._renderChart();
+        }
+
+        async _renderChart() {
+            if (!this.selectedUser || !this.selectedMetric) return;
+
+            const user = game.users.getName(this.selectedUser);
+            if (!user) return;
+
+            const flagData = user.getFlag(FLAG_SCOPE, FLAG_KEY) || {};
+
+            // Collect data points for the selected period
+            const dataPoints = [];
+            const labels = [];
+
+            const startDate = this._parseDate(this.dateFrom);
+            const endDate = this._parseDate(this.dateTo);
+
+            for (let date in flagData) {
+                const dateObj = this._parseDate(date);
+                if (dateObj >= startDate && dateObj <= endDate) {
+                    const userData = flagData[date];
+                    const value = this._extractMetricValue(userData, this.selectedMetric, user.isGM);
+
+                    labels.push(date);
+                    dataPoints.push({ x: date, y: value });
+                }
+            }
+
+            // Sort by date
+            const sortedData = dataPoints.sort((a, b) => {
+                return this._parseDate(a.x) - this._parseDate(b.x);
+            });
+
+            const sortedLabels = sortedData.map(d => d.x);
+            const sortedValues = sortedData.map(d => d.y);
+
+            // Destroy existing chart
+            if (this.chart) {
+                this.chart.destroy();
+            }
+
+            // Create new chart
+            const canvas = this.element.querySelector('#trends-chart');
+            const ctx = canvas.getContext('2d');
+
+            this.chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sortedLabels,
+                    datasets: [{
+                        label: this.selectedMetric,
+                        data: sortedValues,
+                        borderColor: user.isGM ? '#deb887' : '#C19A56',
+                        backgroundColor: user.isGM ? 'rgba(222, 184, 135, 0.1)' : 'rgba(193, 154, 86, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        title: {
+                            display: true,
+                            text: `${this.selectedUser} - ${this.selectedMetric}`,
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Value'
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        _parseDate(dateStr) {
+            const parts = dateStr.split('/');
+            if (parts.length === 3) {
+                return new Date(parts[2], parts[1] - 1, parts[0]);
+            }
+            return new Date(dateStr);
+        }
+
+        _extractMetricValue(userData, metric, isGM) {
+            if (isGM) {
+                switch(metric) {
+                    case 'rolls': return userData.d20Count || 0;
+                    case 'crits': return userData.gmCrits || 0;
+                    case 'fumbles': return userData.gmFumbles || 0;
+                    case 'hits': return userData.gmHits || 0;
+                    case 'misses': return userData.gmMisses || 0;
+                    case 'fearEarned': return userData.gmFearGain || 0;
+                    case 'fearSpent': return userData.gmFearSpend || 0;
+                    case 'count': return userData.d20Count || 0;
+                    case 'min': return this._calculateMin(userData.d20Totals);
+                    case 'max': return this._calculateMax(userData.d20Totals);
+                    case 'avg': return this._calculateAvg(userData.d20Totals);
+                    default: return 0;
+                }
+            } else {
+                switch(metric) {
+                    case 'crits': return userData.duality?.crit || 0;
+                    case 'hits': return userData.playerHits || 0;
+                    case 'misses': return userData.playerMisses || 0;
+                    case 'hopeRolls': return userData.duality?.hope || 0;
+                    case 'fearRolls': return userData.duality?.fear || 0;
+                    case 'hopeGain': return userData.playerHopeEarned || 0;
+                    case 'fearGen': return userData.playerFearGenerated || 0;
+                    case 'min': return this._calculateMin(userData.dualityTotals);
+                    case 'max': return this._calculateMax(userData.dualityTotals);
+                    case 'avg': return this._calculateAvg(userData.dualityTotals);
+                    default: return 0;
+                }
+            }
+        }
+
+        _calculateMin(totals) {
+            if (!totals || Object.keys(totals).length === 0) return 0;
+            const values = Object.keys(totals).map(k => parseInt(k));
+            return Math.min(...values);
+        }
+
+        _calculateMax(totals) {
+            if (!totals || Object.keys(totals).length === 0) return 0;
+            const values = Object.keys(totals).map(k => parseInt(k));
+            return Math.max(...values);
+        }
+
+        _calculateAvg(totals) {
+            if (!totals || Object.keys(totals).length === 0) return 0;
+            let sum = 0;
+            let count = 0;
+            for (let val in totals) {
+                const frequency = totals[val];
+                sum += parseInt(val) * frequency;
+                count += frequency;
+            }
+            return count > 0 ? parseFloat((sum / count).toFixed(1)) : 0;
+        }
+
+        async close(options = {}) {
+            if (this.chart) {
+                this.chart.destroy();
+                this.chart = null;
+            }
+            return super.close(options);
+        }
+    }
+
 //////////////////////////////////////    CHART WINDOW CLASS    //////////////////////////////////////    
 
 class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
@@ -361,6 +690,7 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
             toggleSave: ChartWindow._onToggleSave,
             manageData: ChartWindow._onManageData,
             openSummary: ChartWindow._onOpenSummary,
+            openTrends: ChartWindow._onOpenTrends,
             refreshData: ChartWindow._onRefreshData
         }
     };
@@ -615,6 +945,31 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         } catch (err) {
             console.error("DHS | Failed to open SummaryWindow:", err);
             ui.notifications.error("Failed to open summary. Check console.");
+        }
+    }
+
+    static _onOpenTrends(event, target) {
+        // 'this' refers to the Application instance when invoked by Foundry actions
+        const appElement = this.element; 
+        
+        if (!appElement) {
+            console.error("DHS | Could not find app element.");
+            return;
+        }
+        
+        const fromVal = appElement.querySelector('#fromdateselect')?.value;
+        const toVal = appElement.querySelector('#todateselect')?.value;
+        
+        if (!fromVal || !toVal) {
+            ui.notifications.warn("Please select a date range first.");
+            return;
+        }
+
+        try {
+            new TrendsWindow({ dateFrom: fromVal, dateTo: toVal }).render(true);
+        } catch (err) {
+            console.error("DHS | Failed to open TrendsWindow:", err);
+            ui.notifications.error("Failed to open trends. Check console.");
         }
     }
 

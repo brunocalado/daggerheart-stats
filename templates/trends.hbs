@@ -1,0 +1,25 @@
+<div class="trends-content">
+    <!-- Period Display -->
+    <div class="trends-header">
+        <div class="trends-period">Period: {{period}}</div>
+    </div>
+
+    <!-- User Selection Buttons -->
+    <div class="trends-user-buttons">
+        {{#each users}}
+        <button type="button" class="trends-user-btn {{#if this.isGM}}trends-gm-btn{{/if}}" data-user="{{this.name}}" data-is-gm="{{this.isGM}}">
+            {{#if this.isGM}}<i class="fas fa-skull"></i>{{/if}} {{this.name}}
+        </button>
+        {{/each}}
+    </div>
+
+    <!-- Metric Selection Buttons (Dynamic based on user type) -->
+    <div class="trends-metric-buttons" id="trends-metric-buttons">
+        <!-- Buttons will be injected dynamically via JS -->
+    </div>
+
+    <!-- Canvas for Chart -->
+    <div class="trends-chart-wrapper">
+        <canvas id="trends-chart"></canvas>
+    </div>
+</div>

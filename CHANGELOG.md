@@ -3,6 +3,9 @@
 - Visual alert for player about record on/off
 - Ignores Tag Team final choice
 - Tag char limit
+- New visual for Summary
+- Config template memory
+- New Feature: Trends
 
 # 0.0.7
 - You can set the current GM (in case you have multiple GMs)

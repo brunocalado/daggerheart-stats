@@ -446,3 +446,146 @@
 .dhs-summary-ui .badge-fear-roll, .dhs-summary-ui .badge-chaos, .dhs-summary-ui .badge-fear { background-color: #fee2e2; color: #7f1d1d; border: 1px solid #fca5a5; } /* Darker Red Text */
 .dhs-summary-ui .badge-crit { background-color: #fff8e1; color: #b45309; border: 1px solid #ffe082; } /* Darker Orange/Gold Text */
 .dhs-summary-ui .badge-hit, .dhs-summary-ui .badge-miss { background-color: #e5e7eb; color: #111827; border: 1px solid #d1d5db; }
+
+
+/* -------------------------------------------------------- */
+/* --- TRENDS WINDOW UI SPECIFIC (.dhs-trends-ui) --- */
+/* -------------------------------------------------------- */
+
+.dhs-trends-ui .trends-content {
+    background-color: var(--dh-color-bg);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow-y: auto;
+    max-height: 85vh;
+}
+
+.dhs-trends-ui .trends-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    background-color: var(--dh-color-text);
+    border: 2px solid var(--dh-color-gold);
+    border-radius: 6px;
+}
+
+.dhs-trends-ui .trends-period {
+    font-family: var(--dh-font-header);
+    font-weight: 700;
+    font-size: 1.1em;
+    color: var(--dh-color-gold);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.dhs-trends-ui .trends-user-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    padding: 10px;
+    background-color: rgba(0,0,0,0.03);
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.dhs-trends-ui .trends-user-btn {
+    padding: 8px 16px;
+    background-color: #fff;
+    border: 2px solid var(--dh-color-gold-dim);
+    border-radius: 4px;
+    font-family: var(--dh-font-header);
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--dh-color-text);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dhs-trends-ui .trends-user-btn:hover {
+    background-color: var(--dh-color-gold-dim);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.dhs-trends-ui .trends-user-btn.active {
+    background-color: var(--dh-color-gold);
+    border-color: var(--dh-color-gold);
+    color: #fff;
+}
+
+.dhs-trends-ui .trends-gm-btn {
+    background-color: var(--dhs-gm-bg);
+    border-color: var(--dhs-gm-border);
+    color: var(--dhs-gm-border);
+}
+
+.dhs-trends-ui .trends-gm-btn:hover {
+    background-color: #2a2a2a;
+}
+
+.dhs-trends-ui .trends-gm-btn.active {
+    background-color: var(--dhs-gm-border);
+    color: var(--dhs-gm-bg);
+}
+
+.dhs-trends-ui .trends-metric-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 6px;
+    border: 1px solid var(--dh-color-gold);
+}
+
+.dhs-trends-ui .trends-metric-btn {
+    padding: 6px 12px;
+    background-color: var(--dh-color-bg);
+    border: 1px solid var(--dh-color-gold-dim);
+    border-radius: 4px;
+    font-family: var(--dh-font-body);
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--dh-color-text);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+}
+
+.dhs-trends-ui .trends-metric-btn:hover {
+    background-color: var(--dh-color-gold-dim);
+    color: #fff;
+}
+
+.dhs-trends-ui .trends-metric-btn.active {
+    background-color: var(--dh-color-gold);
+    border-color: var(--dh-color-gold);
+    color: #fff;
+    font-weight: 700;
+}
+
+.dhs-trends-ui .trends-chart-wrapper {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 6px;
+    border: 1px solid var(--dh-color-gold);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dhs-trends-ui #trends-chart {
+    max-width: 100%;
+    max-height: 400px;
+}
