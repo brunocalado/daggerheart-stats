@@ -1,7 +1,14 @@
 <div class="trends-content">
-    <!-- Period Display -->
+    <!-- Period Selection -->
     <div class="trends-header">
-        <div class="trends-period">Period: {{period}}</div>
+        <div class="floating-label-group">
+            <span class="input-label">From</span>
+            <select id="trends-from-date" class="compact-select">{{{dateOptionsFrom}}}</select>
+        </div>
+        <div class="floating-label-group">
+            <span class="input-label">To</span>
+            <select id="trends-to-date" class="compact-select">{{{dateOptionsTo}}}</select>
+        </div>
     </div>
 
     <!-- User Selection Buttons -->

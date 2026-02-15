@@ -465,21 +465,16 @@
 .dhs-trends-ui .trends-header {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-end;
+    gap: 15px;
     padding: 10px;
     background-color: var(--dh-color-text);
     border: 2px solid var(--dh-color-gold);
     border-radius: 6px;
 }
 
-.dhs-trends-ui .trends-period {
-    font-family: var(--dh-font-header);
-    font-weight: 700;
-    font-size: 1.1em;
-    color: var(--dh-color-gold);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
+.dhs-trends-ui .floating-label-group { display: flex; flex-direction: column; min-width: 100px; max-width: 140px; flex: 1; }
+.dhs-trends-ui .input-label { font-family: var(--dh-font-header); font-size: 13px; font-weight: 700; color: #FFFFFF; background-color: var(--dh-color-text); padding: 2px 8px; border-radius: 4px 4px 0 0; text-transform: uppercase; border: 1px solid #333; border-bottom: none; width: 100%; box-sizing: border-box; text-align: center; }
 
 .dhs-trends-ui .trends-user-buttons {
     display: flex;

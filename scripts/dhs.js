@@ -379,20 +379,39 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         async _prepareContext(options) {
             const context = await super._prepareContext(options);
 
-            // Format period display (dateFrom/dateTo are in DD/MM/YYYY format)
-            context.period = `${this.dateFrom} - ${this.dateTo}`;
+            // Collect all unique dates across all visible users
+            const hiddenUsers = game.settings.get(MODULE_ID, 'hiddenUsers') || [];
+            const allDatesSet = new Set();
 
-            // Get all users (GM and players)
             context.users = [];
             for (let user of game.users) {
-                const isHidden = user.getFlag(FLAG_SCOPE, 'hideFromStats') || false;
-                if (!isHidden) {
-                    context.users.push({
-                        name: user.name,
-                        isGM: user.isGM
-                    });
+                if (hiddenUsers.includes(user.name)) continue;
+                context.users.push({
+                    name: user.name,
+                    isGM: user.isGM
+                });
+                const flags = user.getFlag(FLAG_SCOPE, FLAG_KEY);
+                if (flags) {
+                    Object.keys(flags).forEach(d => allDatesSet.add(d));
                 }
             }
+
+            // Sort dates chronologically
+            const allDates = [...allDatesSet].sort((a, b) => {
+                const dateA = new Date(a.split('/').reverse().join('-'));
+                const dateB = new Date(b.split('/').reverse().join('-'));
+                return dateA - dateB;
+            });
+
+            // Build option HTML with pre-selection
+            let optsFrom = '';
+            let optsTo = '';
+            for (const d of allDates) {
+                optsFrom += `<option value="${d}"${d === this.dateFrom ? ' selected' : ''}>${d}</option>`;
+                optsTo += `<option value="${d}"${d === this.dateTo ? ' selected' : ''}>${d}</option>`;
+            }
+            context.dateOptionsFrom = optsFrom;
+            context.dateOptionsTo = optsTo;
 
             return context;
         }
@@ -423,6 +442,31 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
             userButtons.forEach(btn => {
                 btn.addEventListener('click', (e) => this._onUserSelect(e));
             });
+
+            const fromSelect = this.element.querySelector('#trends-from-date');
+            const toSelect = this.element.querySelector('#trends-to-date');
+            if (fromSelect) fromSelect.addEventListener('change', (e) => this._onDateChange(e));
+            if (toSelect) toSelect.addEventListener('change', (e) => this._onDateChange(e));
+        }
+
+        _onDateChange(event) {
+            const fromSelect = this.element.querySelector('#trends-from-date');
+            const toSelect = this.element.querySelector('#trends-to-date');
+            if (!fromSelect || !toSelect) return;
+
+            const fromVal = fromSelect.value;
+            const toVal = toSelect.value;
+
+            const start = this._parseDate(fromVal);
+            const end = this._parseDate(toVal);
+            if (start > end) {
+                ui.notifications.error("Wrong date selection");
+                return;
+            }
+
+            this.dateFrom = fromVal;
+            this.dateTo = toVal;
+            this._renderChart();
         }
 
         _onUserSelect(event) {
