@@ -1,3 +1,6 @@
+# 0.0.9
+- visual glitch fixed
+
 # 0.0.8
 - Improved debug
 - Visual alert for player about record on/off

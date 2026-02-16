@@ -621,9 +621,12 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         const canvas = this.element.querySelector('#trends-chart');
         const ctx = canvas.getContext('2d');
 
-        // Dark Glass Golden Gradient
-        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(197, 160, 89, 0.4)'); // Daggerheart Gold
+        // Get canvas height for proper gradient scaling
+        const canvasHeight = canvas.offsetHeight || 400;
+
+        // Dark Glass Golden Gradient (Use canvas height for proper scaling)
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvasHeight);
+        gradient.addColorStop(0, 'rgba(197, 160, 89, 0.5)'); // Daggerheart Gold
         gradient.addColorStop(1, 'rgba(26, 27, 30, 0.0)');   // Fade to dark/transparent
 
         this.chart = new Chart(ctx, {
@@ -636,9 +639,10 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                     borderColor: '#c5a059', // Solid Gold
                     backgroundColor: gradient, // Gradient Fill
                     borderWidth: 2,
-                    tension: 0.3, // Smooth curve
+                    tension: 0, // Linear segments (no curves) to avoid rendering artifacts
                     fill: true,   // Enable area fill
-                    
+                    spanGaps: true, // Fill gaps in data
+
                     // Point Styles (Dark circle with Gold border)
                     pointRadius: 4,
                     pointHoverRadius: 7,
@@ -652,6 +656,18 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: {
+                    duration: 1500
+                },
+                elements: {
+                    line: {
+                        borderCapStyle: 'round',
+                        borderJoinStyle: 'round'
+                    },
+                    point: {
+                        hitRadius: 10
+                    }
+                },
                 plugins: {
                     legend: {
                         display: false // We use the title instead
