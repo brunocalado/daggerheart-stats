@@ -347,7 +347,7 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
             super(options);
             this.dateFrom = options.dateFrom;
             this.dateTo = options.dateTo;
-            this.selectedUser = null;
+            this.selectedUser = options.selectedUser || null;
             this.selectedMetric = null;
             this.chart = null;
         }
@@ -363,7 +363,7 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                 contentClasses: ["trends-content"]
             },
             position: {
-                width: 1000,
+                width: 920,
                 height: 650
             }
         };
@@ -379,17 +379,27 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         async _prepareContext(options) {
             const context = await super._prepareContext(options);
 
-            // Collect all unique dates across all visible users
+            // Collect all unique dates across all visible users and build user options
             const hiddenUsers = game.settings.get(MODULE_ID, 'hiddenUsers') || [];
             const allDatesSet = new Set();
 
-            context.users = [];
+            // Build user options (same logic as ChartWindow._getUsersOptions)
+            let userNames = [];
+            if (!game.settings.get(MODULE_ID, 'allowviewgmstats') && !game.user.isGM) {
+                userNames = game.users.contents.filter(u => !u.isGM && !hiddenUsers.includes(u.name)).map(u => u.name);
+            } else {
+                userNames = game.users.contents.filter(u => !hiddenUsers.includes(u.name)).map(u => u.name);
+            }
+
+            let userOpts = '';
+            for (const name of userNames) {
+                userOpts += `<option value="${name}"${name === this.selectedUser ? ' selected' : ''}>${name}</option>`;
+            }
+            context.userOptions = userOpts;
+
+            // Collect dates from all visible users
             for (let user of game.users) {
                 if (hiddenUsers.includes(user.name)) continue;
-                context.users.push({
-                    name: user.name,
-                    isGM: user.isGM
-                });
                 const flags = user.getFlag(FLAG_SCOPE, FLAG_KEY);
                 if (flags) {
                     Object.keys(flags).forEach(d => allDatesSet.add(d));
@@ -403,7 +413,7 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                 return dateA - dateB;
             });
 
-            // Build option HTML with pre-selection
+            // Build date option HTML with pre-selection
             let optsFrom = '';
             let optsTo = '';
             for (const d of allDates) {
@@ -438,18 +448,20 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         }
 
         _attachEventListeners() {
-            const userButtons = this.element.querySelectorAll('.trends-user-btn');
-            userButtons.forEach(btn => {
-                btn.addEventListener('click', (e) => this._onUserSelect(e));
-            });
+            const userSelect = this.element.querySelector('#trends-user-select');
+            if (userSelect) {
+                userSelect.addEventListener('change', () => this._onUserChange());
+                // If a user is already pre-selected, show metric buttons immediately
+                if (this.selectedUser) this._onUserChange();
+            }
 
             const fromSelect = this.element.querySelector('#trends-from-date');
             const toSelect = this.element.querySelector('#trends-to-date');
-            if (fromSelect) fromSelect.addEventListener('change', (e) => this._onDateChange(e));
-            if (toSelect) toSelect.addEventListener('change', (e) => this._onDateChange(e));
+            if (fromSelect) fromSelect.addEventListener('change', () => this._onDateChange());
+            if (toSelect) toSelect.addEventListener('change', () => this._onDateChange());
         }
 
-        _onDateChange(event) {
+        _onDateChange() {
             const fromSelect = this.element.querySelector('#trends-from-date');
             const toSelect = this.element.querySelector('#trends-to-date');
             if (!fromSelect || !toSelect) return;
@@ -469,19 +481,17 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
             this._renderChart();
         }
 
-        _onUserSelect(event) {
-            const button = event.currentTarget;
-            const userName = button.dataset.user;
-            const isGM = button.dataset.isGm === 'true';
+        _onUserChange() {
+            const userSelect = this.element.querySelector('#trends-user-select');
+            if (!userSelect) return;
 
-            // Update active button
-            this.element.querySelectorAll('.trends-user-btn').forEach(b => b.classList.remove('active'));
-            button.classList.add('active');
+            const userName = userSelect.value;
+            const userObj = game.users.getName(userName);
+            const isGM = userObj ? userObj.isGM : false;
 
             this.selectedUser = userName;
             this.selectedMetric = null;
 
-            // Update metric buttons based on user type
             this._updateMetricButtons(isGM);
         }
 
@@ -528,6 +538,10 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                 btn.addEventListener('click', (e) => this._onMetricSelect(e));
                 container.appendChild(btn);
             });
+
+            // Auto-select first metric button
+            const firstBtn = container.querySelector('.trends-metric-btn');
+            if (firstBtn) firstBtn.click();
         }
 
         _onMetricSelect(event) {
@@ -592,7 +606,6 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                 data: {
                     labels: sortedLabels,
                     datasets: [{
-                        label: this.selectedMetric,
                         data: sortedValues,
                         borderColor: user.isGM ? '#deb887' : '#C19A56',
                         backgroundColor: user.isGM ? 'rgba(222, 184, 135, 0.1)' : 'rgba(193, 154, 86, 0.1)',
@@ -605,11 +618,10 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            display: true,
-                            position: 'top'
+                            display: false
                         },
                         title: {
                             display: true,
@@ -623,8 +635,7 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                     scales: {
                         x: {
                             title: {
-                                display: true,
-                                text: 'Date'
+                                display: false
                             }
                         },
                         y: {
@@ -994,23 +1005,24 @@ class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
 
     static _onOpenTrends(event, target) {
         // 'this' refers to the Application instance when invoked by Foundry actions
-        const appElement = this.element; 
-        
+        const appElement = this.element;
+
         if (!appElement) {
             console.error("DHS | Could not find app element.");
             return;
         }
-        
+
         const fromVal = appElement.querySelector('#fromdateselect')?.value;
         const toVal = appElement.querySelector('#todateselect')?.value;
-        
+        const userVal = appElement.querySelector('#selectuser')?.value;
+
         if (!fromVal || !toVal) {
             ui.notifications.warn("Please select a date range first.");
             return;
         }
 
         try {
-            new TrendsWindow({ dateFrom: fromVal, dateTo: toVal }).render(true);
+            new TrendsWindow({ dateFrom: fromVal, dateTo: toVal, selectedUser: userVal }).render(true);
         } catch (err) {
             console.error("DHS | Failed to open TrendsWindow:", err);
             ui.notifications.error("Failed to open trends. Check console.");

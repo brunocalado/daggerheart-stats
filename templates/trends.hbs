@@ -1,6 +1,10 @@
 <div class="trends-content">
-    <!-- Period Selection -->
+    <!-- Selections -->
     <div class="trends-header">
+        <div class="floating-label-group">
+            <span class="input-label">User</span>
+            <select id="trends-user-select" class="compact-select">{{{userOptions}}}</select>
+        </div>
         <div class="floating-label-group">
             <span class="input-label">From</span>
             <select id="trends-from-date" class="compact-select">{{{dateOptionsFrom}}}</select>
@@ -9,15 +13,6 @@
             <span class="input-label">To</span>
             <select id="trends-to-date" class="compact-select">{{{dateOptionsTo}}}</select>
         </div>
-    </div>
-
-    <!-- User Selection Buttons -->
-    <div class="trends-user-buttons">
-        {{#each users}}
-        <button type="button" class="trends-user-btn {{#if this.isGM}}trends-gm-btn{{/if}}" data-user="{{this.name}}" data-is-gm="{{this.isGM}}">
-            {{#if this.isGM}}<i class="fas fa-skull"></i>{{/if}} {{this.name}}
-        </button>
-        {{/each}}
     </div>
 
     <!-- Metric Selection Buttons (Dynamic based on user type) -->

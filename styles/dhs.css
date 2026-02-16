@@ -454,12 +454,13 @@
 
 .dhs-trends-ui .trends-content {
     background-color: var(--dh-color-bg);
-    padding: 15px;
+    padding: 5px;
     display: flex;
     flex-direction: column;
     gap: 15px;
     overflow-y: auto;
-    max-height: 85vh;
+    min-width: 880px;
+    min-height: 560px;
 }
 
 .dhs-trends-ui .trends-header {
@@ -476,64 +477,10 @@
 .dhs-trends-ui .floating-label-group { display: flex; flex-direction: column; min-width: 100px; max-width: 140px; flex: 1; }
 .dhs-trends-ui .input-label { font-family: var(--dh-font-header); font-size: 13px; font-weight: 700; color: #FFFFFF; background-color: var(--dh-color-text); padding: 2px 8px; border-radius: 4px 4px 0 0; text-transform: uppercase; border: 1px solid #333; border-bottom: none; width: 100%; box-sizing: border-box; text-align: center; }
 
-.dhs-trends-ui .trends-user-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-    padding: 10px;
-    background-color: rgba(0,0,0,0.03);
-    border-radius: 6px;
-    border: 1px solid rgba(0,0,0,0.1);
-}
-
-.dhs-trends-ui .trends-user-btn {
-    padding: 8px 16px;
-    background-color: #fff;
-    border: 2px solid var(--dh-color-gold-dim);
-    border-radius: 4px;
-    font-family: var(--dh-font-header);
-    font-weight: 700;
-    font-size: 14px;
-    color: var(--dh-color-text);
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.dhs-trends-ui .trends-user-btn:hover {
-    background-color: var(--dh-color-gold-dim);
-    color: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.dhs-trends-ui .trends-user-btn.active {
-    background-color: var(--dh-color-gold);
-    border-color: var(--dh-color-gold);
-    color: #fff;
-}
-
-.dhs-trends-ui .trends-gm-btn {
-    background-color: var(--dhs-gm-bg);
-    border-color: var(--dhs-gm-border);
-    color: var(--dhs-gm-border);
-}
-
-.dhs-trends-ui .trends-gm-btn:hover {
-    background-color: #2a2a2a;
-}
-
-.dhs-trends-ui .trends-gm-btn.active {
-    background-color: var(--dhs-gm-border);
-    color: var(--dhs-gm-bg);
-}
 
 .dhs-trends-ui .trends-metric-buttons {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 6px;
     justify-content: center;
     padding: 10px;
@@ -570,17 +517,18 @@
 
 .dhs-trends-ui .trends-chart-wrapper {
     background-color: #fff;
-    padding: 20px;
+    padding: 10px 5px;
     border-radius: 6px;
     border: 1px solid var(--dh-color-gold);
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    min-height: 400px;
+    min-height: 440px;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex: 1;
 }
 
 .dhs-trends-ui #trends-chart {
-    max-width: 100%;
-    max-height: 400px;
+    width: 100% !important;
+    height: 100% !important;
 }
