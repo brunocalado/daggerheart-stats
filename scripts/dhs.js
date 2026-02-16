@@ -343,426 +343,450 @@ class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
 //////////////////////////////////////    TRENDS WINDOW CLASS    //////////////////////////////////////
 
 class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
-        constructor(options = {}) {
-            super(options);
-            this.dateFrom = options.dateFrom;
-            this.dateTo = options.dateTo;
-            this.selectedUser = options.selectedUser || null;
-            this.selectedMetric = null;
-            this.chart = null;
-        }
+    constructor(options = {}) {
+        super(options);
+        this.dateFrom = options.dateFrom;
+        this.dateTo = options.dateTo;
+        this.selectedUser = options.selectedUser || null;
+        this.selectedMetric = null;
+        this.chart = null;
+    }
 
-        static DEFAULT_OPTIONS = {
-            id: "dhs-trends-win",
-            tag: "div",
-            classes: ["dhs-app-window", "dhs-trends-ui"],
-            window: {
-                title: "Daggerheart: Trends",
-                icon: "fas fa-chart-line",
-                resizable: true,
-                contentClasses: ["trends-content"]
-            },
-            position: {
-                width: 920,
-                height: 670
+    static DEFAULT_OPTIONS = {
+        id: "dhs-trends-win",
+        tag: "div",
+        classes: ["dhs-app-window", "dhs-trends-ui"],
+        window: {
+            title: "Daggerheart: Trends",
+            icon: "fas fa-chart-line",
+            resizable: true,
+            contentClasses: ["trends-content"]
+        },
+        position: {
+            width: 920,
+            height: 670
+        }
+    };
+
+    static get PARTS() {
+        return {
+            content: {
+                template: `modules/${MODULE_ID}/templates/trends.hbs`,
             }
         };
+    }
 
-        static get PARTS() {
-            return {
-                content: {
-                    template: `modules/${MODULE_ID}/templates/trends.hbs`,
-                }
-            };
+    async _prepareContext(options) {
+        const context = await super._prepareContext(options);
+
+        // Collect all unique dates across all visible users and build user options
+        const hiddenUsers = game.settings.get(MODULE_ID, 'hiddenUsers') || [];
+        const allDatesSet = new Set();
+
+        // Build user options (same logic as ChartWindow._getUsersOptions)
+        let userNames = [];
+        if (!game.settings.get(MODULE_ID, 'allowviewgmstats') && !game.user.isGM) {
+            userNames = game.users.contents.filter(u => !u.isGM && !hiddenUsers.includes(u.name)).map(u => u.name);
+        } else {
+            userNames = game.users.contents.filter(u => !hiddenUsers.includes(u.name)).map(u => u.name);
         }
 
-        async _prepareContext(options) {
-            const context = await super._prepareContext(options);
+        let userOpts = '';
+        for (const name of userNames) {
+            userOpts += `<option value="${name}"${name === this.selectedUser ? ' selected' : ''}>${name}</option>`;
+        }
+        context.userOptions = userOpts;
 
-            // Collect all unique dates across all visible users and build user options
-            const hiddenUsers = game.settings.get(MODULE_ID, 'hiddenUsers') || [];
-            const allDatesSet = new Set();
-
-            // Build user options (same logic as ChartWindow._getUsersOptions)
-            let userNames = [];
-            if (!game.settings.get(MODULE_ID, 'allowviewgmstats') && !game.user.isGM) {
-                userNames = game.users.contents.filter(u => !u.isGM && !hiddenUsers.includes(u.name)).map(u => u.name);
-            } else {
-                userNames = game.users.contents.filter(u => !hiddenUsers.includes(u.name)).map(u => u.name);
+        // Collect dates from all visible users
+        for (let user of game.users) {
+            if (hiddenUsers.includes(user.name)) continue;
+            const flags = user.getFlag(FLAG_SCOPE, FLAG_KEY);
+            if (flags) {
+                Object.keys(flags).forEach(d => allDatesSet.add(d));
             }
+        }
 
-            let userOpts = '';
-            for (const name of userNames) {
-                userOpts += `<option value="${name}"${name === this.selectedUser ? ' selected' : ''}>${name}</option>`;
+        // Sort dates chronologically
+        const allDates = [...allDatesSet].sort((a, b) => {
+            const dateA = new Date(a.split('/').reverse().join('-'));
+            const dateB = new Date(b.split('/').reverse().join('-'));
+            return dateA - dateB;
+        });
+
+        // Build date option HTML with pre-selection
+        let optsFrom = '';
+        let optsTo = '';
+        for (const d of allDates) {
+            optsFrom += `<option value="${d}"${d === this.dateFrom ? ' selected' : ''}>${d}</option>`;
+            optsTo += `<option value="${d}"${d === this.dateTo ? ' selected' : ''}>${d}</option>`;
+        }
+        context.dateOptionsFrom = optsFrom;
+        context.dateOptionsTo = optsTo;
+
+        return context;
+    }
+
+    _onRender(context, options) {
+        super._onRender(context, options);
+
+        // Load Chart.js if not already loaded
+        this._loadChartJS().then(() => {
+            this._attachEventListeners();
+        });
+    }
+
+    async _loadChartJS() {
+        if (typeof Chart !== 'undefined') return;
+
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+
+    _attachEventListeners() {
+        const userSelect = this.element.querySelector('#trends-user-select');
+        if (userSelect) {
+            userSelect.addEventListener('change', () => this._onUserChange());
+            // If a user is already pre-selected, show metric buttons immediately
+            if (this.selectedUser) this._onUserChange();
+        }
+
+        const fromSelect = this.element.querySelector('#trends-from-date');
+        const toSelect = this.element.querySelector('#trends-to-date');
+        if (fromSelect) fromSelect.addEventListener('change', () => this._onDateChange());
+        if (toSelect) toSelect.addEventListener('change', () => this._onDateChange());
+    }
+
+    _onDateChange() {
+        const fromSelect = this.element.querySelector('#trends-from-date');
+        const toSelect = this.element.querySelector('#trends-to-date');
+        if (!fromSelect || !toSelect) return;
+
+        const fromVal = fromSelect.value;
+        const toVal = toSelect.value;
+
+        const start = this._parseDate(fromVal);
+        const end = this._parseDate(toVal);
+        if (start > end) {
+            ui.notifications.error("Wrong date selection");
+            return;
+        }
+
+        this.dateFrom = fromVal;
+        this.dateTo = toVal;
+        this._renderChart();
+    }
+
+    _onUserChange() {
+        const userSelect = this.element.querySelector('#trends-user-select');
+        if (!userSelect) return;
+
+        const userName = userSelect.value;
+        const userObj = game.users.getName(userName);
+        const isGM = userObj ? userObj.isGM : false;
+
+        this.selectedUser = userName;
+        this.selectedMetric = null;
+
+        this._updateMetricButtons(isGM);
+    }
+
+    _getMetricDisplayLabel(metric) {
+        const labels = {
+            'rolls': 'D20 Rolls',
+            'crits': 'Critical Hits',
+            'fumbles': 'Fumbles',
+            'hits': 'Successful Hits',
+            'misses': 'Missed Rolls',
+            'min': 'Minimum Value',
+            'max': 'Maximum Value',
+            'avg': 'Average Value',
+            'fearEarned': 'Fear Earned',
+            'fearSpent': 'Fear Spent',
+            'hopeRolls': 'Hope Rolls',
+            'fearRolls': 'Fear Rolls',
+            'hopeGain': 'Hope Earned',
+            'fearGen': 'Fear Generated'
+        };
+        return labels[metric] || metric;
+    }
+
+    _updateMetricButtons(isGM) {
+        const container = this.element.querySelector('#trends-metric-buttons');
+        container.innerHTML = '';
+
+        let metrics = [];
+        if (isGM) {
+            metrics = [
+                { key: 'rolls', label: 'Rolls', tooltip: 'Total number of d20 rolls' },
+                { key: 'crits', label: 'Crits', tooltip: 'Number of critical successes' },
+                { key: 'fumbles', label: 'Fumbles', tooltip: 'Number of fumbles (natural 1s)' },
+                { key: 'hits', label: 'Hits', tooltip: 'Number of successful attacks on marked targets' },
+                { key: 'misses', label: 'Misses', tooltip: 'Number of missed attacks on marked targets' },
+                { key: 'min', label: 'Min', tooltip: 'Minimum roll value in the period' },
+                { key: 'max', label: 'Max', tooltip: 'Maximum roll value in the period' },
+                { key: 'avg', label: 'Avg', tooltip: 'Average roll value in the period' },
+                { key: 'fearEarned', label: 'Fear Earned', tooltip: 'Total Fear gained' },
+                { key: 'fearSpent', label: 'Fear Spent', tooltip: 'Total Fear spent' }
+            ];
+        } else {
+            metrics = [
+                { key: 'crits', label: 'Crits', tooltip: 'Number of critical successes' },
+                { key: 'hits', label: 'Hits', tooltip: 'Number of successful attacks on marked targets' },
+                { key: 'misses', label: 'Misses', tooltip: 'Number of missed attacks on marked targets' },
+                { key: 'min', label: 'Min', tooltip: 'Minimum duality roll value in the period' },
+                { key: 'max', label: 'Max', tooltip: 'Maximum duality roll value in the period' },
+                { key: 'avg', label: 'Avg', tooltip: 'Average duality roll value in the period' },
+                { key: 'hopeRolls', label: 'Hope Rolls', tooltip: 'Number of rolls that resulted in Hope' },
+                { key: 'fearRolls', label: 'Fear Rolls', tooltip: 'Number of rolls that resulted in Fear' },
+                { key: 'hopeGain', label: 'Hope Gain', tooltip: 'Number of action rolls that earned Hope' },
+                { key: 'fearGen', label: 'Fear Gen', tooltip: 'Number of action rolls that generated Fear' }
+            ];
+        }
+
+        metrics.forEach(metric => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'trends-metric-btn';
+            btn.textContent = metric.label;
+            btn.dataset.metric = metric.key;
+            btn.title = metric.tooltip;
+            btn.addEventListener('click', (e) => this._onMetricSelect(e));
+            container.appendChild(btn);
+        });
+
+        // Auto-select first metric button
+        const firstBtn = container.querySelector('.trends-metric-btn');
+        if (firstBtn) firstBtn.click();
+    }
+
+    _onMetricSelect(event) {
+        const button = event.currentTarget;
+        const metric = button.dataset.metric;
+
+        // Update active button
+        this.element.querySelectorAll('.trends-metric-btn').forEach(b => b.classList.remove('active'));
+        button.classList.add('active');
+
+        this.selectedMetric = metric;
+
+        // Render chart
+        this._renderChart();
+    }
+
+    async _renderChart() {
+        if (!this.selectedUser || !this.selectedMetric) return;
+
+        const user = game.users.getName(this.selectedUser);
+        if (!user) return;
+
+        const flagData = user.getFlag(FLAG_SCOPE, FLAG_KEY) || {};
+
+        // Collect data points for the selected period
+        const dataPoints = [];
+        const labels = [];
+
+        const startDate = this._parseDate(this.dateFrom);
+        const endDate = this._parseDate(this.dateTo);
+
+        for (let date in flagData) {
+            const dateObj = this._parseDate(date);
+            if (dateObj >= startDate && dateObj <= endDate) {
+                const userData = flagData[date];
+                const value = this._extractMetricValue(userData, this.selectedMetric, user.isGM);
+
+                labels.push(date); // Maintain d/m/y format including year
+                dataPoints.push({ x: date, y: value });
             }
-            context.userOptions = userOpts;
-
-            // Collect dates from all visible users
-            for (let user of game.users) {
-                if (hiddenUsers.includes(user.name)) continue;
-                const flags = user.getFlag(FLAG_SCOPE, FLAG_KEY);
-                if (flags) {
-                    Object.keys(flags).forEach(d => allDatesSet.add(d));
-                }
-            }
-
-            // Sort dates chronologically
-            const allDates = [...allDatesSet].sort((a, b) => {
-                const dateA = new Date(a.split('/').reverse().join('-'));
-                const dateB = new Date(b.split('/').reverse().join('-'));
-                return dateA - dateB;
-            });
-
-            // Build date option HTML with pre-selection
-            let optsFrom = '';
-            let optsTo = '';
-            for (const d of allDates) {
-                optsFrom += `<option value="${d}"${d === this.dateFrom ? ' selected' : ''}>${d}</option>`;
-                optsTo += `<option value="${d}"${d === this.dateTo ? ' selected' : ''}>${d}</option>`;
-            }
-            context.dateOptionsFrom = optsFrom;
-            context.dateOptionsTo = optsTo;
-
-            return context;
         }
 
-        _onRender(context, options) {
-            super._onRender(context, options);
+        // Sort by date
+        const sortedData = dataPoints.sort((a, b) => {
+            return this._parseDate(a.x) - this._parseDate(b.x);
+        });
 
-            // Load Chart.js if not already loaded
-            this._loadChartJS().then(() => {
-                this._attachEventListeners();
-            });
+        const sortedLabels = sortedData.map(d => d.x);
+        const sortedValues = sortedData.map(d => d.y);
+
+        // Destroy existing chart
+        if (this.chart) {
+            this.chart.destroy();
         }
 
-        async _loadChartJS() {
-            if (typeof Chart !== 'undefined') return;
+        // Create new chart
+        const canvas = this.element.querySelector('#trends-chart');
+        const ctx = canvas.getContext('2d');
 
-            return new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
-                script.onload = resolve;
-                script.onerror = reject;
-                document.head.appendChild(script);
-            });
-        }
+        // Dark Glass Golden Gradient
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(197, 160, 89, 0.4)'); // Daggerheart Gold
+        gradient.addColorStop(1, 'rgba(26, 27, 30, 0.0)');   // Fade to dark/transparent
 
-        _attachEventListeners() {
-            const userSelect = this.element.querySelector('#trends-user-select');
-            if (userSelect) {
-                userSelect.addEventListener('change', () => this._onUserChange());
-                // If a user is already pre-selected, show metric buttons immediately
-                if (this.selectedUser) this._onUserChange();
-            }
-
-            const fromSelect = this.element.querySelector('#trends-from-date');
-            const toSelect = this.element.querySelector('#trends-to-date');
-            if (fromSelect) fromSelect.addEventListener('change', () => this._onDateChange());
-            if (toSelect) toSelect.addEventListener('change', () => this._onDateChange());
-        }
-
-        _onDateChange() {
-            const fromSelect = this.element.querySelector('#trends-from-date');
-            const toSelect = this.element.querySelector('#trends-to-date');
-            if (!fromSelect || !toSelect) return;
-
-            const fromVal = fromSelect.value;
-            const toVal = toSelect.value;
-
-            const start = this._parseDate(fromVal);
-            const end = this._parseDate(toVal);
-            if (start > end) {
-                ui.notifications.error("Wrong date selection");
-                return;
-            }
-
-            this.dateFrom = fromVal;
-            this.dateTo = toVal;
-            this._renderChart();
-        }
-
-        _onUserChange() {
-            const userSelect = this.element.querySelector('#trends-user-select');
-            if (!userSelect) return;
-
-            const userName = userSelect.value;
-            const userObj = game.users.getName(userName);
-            const isGM = userObj ? userObj.isGM : false;
-
-            this.selectedUser = userName;
-            this.selectedMetric = null;
-
-            this._updateMetricButtons(isGM);
-        }
-
-        _getMetricDisplayLabel(metric) {
-            const labels = {
-                'rolls': 'D20 Rolls',
-                'crits': 'Critical Hits',
-                'fumbles': 'Fumbles',
-                'hits': 'Successful Hits',
-                'misses': 'Missed Rolls',
-                'min': 'Minimum Value',
-                'max': 'Maximum Value',
-                'avg': 'Average Value',
-                'fearEarned': 'Fear Earned',
-                'fearSpent': 'Fear Spent',
-                'hopeRolls': 'Hope Rolls',
-                'fearRolls': 'Fear Rolls',
-                'hopeGain': 'Hope Earned',
-                'fearGen': 'Fear Generated'
-            };
-            return labels[metric] || metric;
-        }
-
-        _updateMetricButtons(isGM) {
-            const container = this.element.querySelector('#trends-metric-buttons');
-            container.innerHTML = '';
-
-            let metrics = [];
-            if (isGM) {
-                metrics = [
-                    { key: 'rolls', label: 'Rolls', tooltip: 'Total number of d20 rolls' },
-                    { key: 'crits', label: 'Crits', tooltip: 'Number of critical successes' },
-                    { key: 'fumbles', label: 'Fumbles', tooltip: 'Number of fumbles (natural 1s)' },
-                    { key: 'hits', label: 'Hits', tooltip: 'Number of successful attacks on marked targets' },
-                    { key: 'misses', label: 'Misses', tooltip: 'Number of missed attacks on marked targets' },
-                    { key: 'min', label: 'Min', tooltip: 'Minimum roll value in the period' },
-                    { key: 'max', label: 'Max', tooltip: 'Maximum roll value in the period' },
-                    { key: 'avg', label: 'Avg', tooltip: 'Average roll value in the period' },
-                    { key: 'fearEarned', label: 'Fear Earned', tooltip: 'Total Fear gained' },
-                    { key: 'fearSpent', label: 'Fear Spent', tooltip: 'Total Fear spent' }
-                ];
-            } else {
-                metrics = [
-                    { key: 'crits', label: 'Crits', tooltip: 'Number of critical successes' },
-                    { key: 'hits', label: 'Hits', tooltip: 'Number of successful attacks on marked targets' },
-                    { key: 'misses', label: 'Misses', tooltip: 'Number of missed attacks on marked targets' },
-                    { key: 'min', label: 'Min', tooltip: 'Minimum duality roll value in the period' },
-                    { key: 'max', label: 'Max', tooltip: 'Maximum duality roll value in the period' },
-                    { key: 'avg', label: 'Avg', tooltip: 'Average duality roll value in the period' },
-                    { key: 'hopeRolls', label: 'Hope Rolls', tooltip: 'Number of rolls that resulted in Hope' },
-                    { key: 'fearRolls', label: 'Fear Rolls', tooltip: 'Number of rolls that resulted in Fear' },
-                    { key: 'hopeGain', label: 'Hope Gain', tooltip: 'Number of action rolls that earned Hope' },
-                    { key: 'fearGen', label: 'Fear Gen', tooltip: 'Number of action rolls that generated Fear' }
-                ];
-            }
-
-            metrics.forEach(metric => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'trends-metric-btn';
-                btn.textContent = metric.label;
-                btn.dataset.metric = metric.key;
-                btn.title = metric.tooltip;
-                btn.addEventListener('click', (e) => this._onMetricSelect(e));
-                container.appendChild(btn);
-            });
-
-            // Auto-select first metric button
-            const firstBtn = container.querySelector('.trends-metric-btn');
-            if (firstBtn) firstBtn.click();
-        }
-
-        _onMetricSelect(event) {
-            const button = event.currentTarget;
-            const metric = button.dataset.metric;
-
-            // Update active button
-            this.element.querySelectorAll('.trends-metric-btn').forEach(b => b.classList.remove('active'));
-            button.classList.add('active');
-
-            this.selectedMetric = metric;
-
-            // Render chart
-            this._renderChart();
-        }
-
-        async _renderChart() {
-            if (!this.selectedUser || !this.selectedMetric) return;
-
-            const user = game.users.getName(this.selectedUser);
-            if (!user) return;
-
-            const flagData = user.getFlag(FLAG_SCOPE, FLAG_KEY) || {};
-
-            // Collect data points for the selected period
-            const dataPoints = [];
-            const labels = [];
-
-            const startDate = this._parseDate(this.dateFrom);
-            const endDate = this._parseDate(this.dateTo);
-
-            for (let date in flagData) {
-                const dateObj = this._parseDate(date);
-                if (dateObj >= startDate && dateObj <= endDate) {
-                    const userData = flagData[date];
-                    const value = this._extractMetricValue(userData, this.selectedMetric, user.isGM);
-
-                    labels.push(date);
-                    dataPoints.push({ x: date, y: value });
-                }
-            }
-
-            // Sort by date
-            const sortedData = dataPoints.sort((a, b) => {
-                return this._parseDate(a.x) - this._parseDate(b.x);
-            });
-
-            const sortedLabels = sortedData.map(d => d.x);
-            const sortedValues = sortedData.map(d => d.y);
-
-            // Destroy existing chart
-            if (this.chart) {
-                this.chart.destroy();
-            }
-
-            // Create new chart
-            const canvas = this.element.querySelector('#trends-chart');
-            const ctx = canvas.getContext('2d');
-
-            this.chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: sortedLabels,
-                    datasets: [{
-                        data: sortedValues,
-                        borderColor: user.isGM ? '#deb887' : '#C19A56',
-                        backgroundColor: user.isGM ? 'rgba(222, 184, 135, 0.1)' : 'rgba(193, 154, 86, 0.1)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        fill: true,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        title: {
-                            display: true,
-                            text: `${this.selectedUser} - ${this._getMetricDisplayLabel(this.selectedMetric)}`,
-                            font: {
-                                size: 16,
-                                weight: 'bold'
-                            }
-                        },
-                        tooltip: {
-                            displayColors: false,
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            titleColor: '#C19A56',
-                            bodyColor: '#ffffff',
-                            borderColor: '#C19A56',
-                            borderWidth: 1,
-                            padding: 10,
-                            titleFont: {
-                                size: 13,
-                                weight: 'bold'
-                            },
-                            bodyFont: {
-                                size: 12
-                            },
-                            callbacks: {
-                                label: function(context) {
-                                    return 'Value: ' + context.parsed.y;
-                                }
-                            }
-                        }
+        this.chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: sortedLabels,
+                datasets: [{
+                    data: sortedValues,
+                    label: this._getMetricDisplayLabel(this.selectedMetric),
+                    borderColor: '#c5a059', // Solid Gold
+                    backgroundColor: gradient, // Gradient Fill
+                    borderWidth: 2,
+                    tension: 0.3, // Smooth curve
+                    fill: true,   // Enable area fill
+                    
+                    // Point Styles (Dark circle with Gold border)
+                    pointRadius: 4,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: '#1a1b1e', // Dark center
+                    pointBorderColor: '#c5a059',     // Gold border
+                    pointBorderWidth: 2,
+                    pointHoverBackgroundColor: '#c5a059', // Invert on hover
+                    pointHoverBorderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false // We use the title instead
                     },
-                    scales: {
-                        x: {
-                            title: {
-                                display: false
-                            }
+                    title: {
+                        display: true,
+                        text: `${this.selectedUser} - ${this._getMetricDisplayLabel(this.selectedMetric)}`,
+                        color: '#e0e0e0',
+                        font: {
+                            size: 16,
+                            family: "'Signika', sans-serif",
+                            weight: '300'
                         },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Value'
-                            },
-                            beginAtZero: true
+                        padding: { bottom: 20 }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(26, 27, 30, 0.9)',
+                        titleColor: '#c5a059',
+                        bodyColor: '#ffffff',
+                        borderColor: '#3f4148',
+                        borderWidth: 1,
+                        padding: 10,
+                        displayColors: false,
+                        titleFont: { size: 13, weight: 'bold' },
+                        bodyFont: { size: 12 },
+                        callbacks: {
+                            label: function(context) {
+                                return `Value: ${context.parsed.y}`;
+                            }
                         }
                     }
-                }
-            });
-        }
-
-        _parseDate(dateStr) {
-            const parts = dateStr.split('/');
-            if (parts.length === 3) {
-                return new Date(parts[2], parts[1] - 1, parts[0]);
-            }
-            return new Date(dateStr);
-        }
-
-        _extractMetricValue(userData, metric, isGM) {
-            if (isGM) {
-                switch(metric) {
-                    case 'rolls': return userData.d20Count || 0;
-                    case 'crits': return userData.gmCrits || 0;
-                    case 'fumbles': return userData.gmFumbles || 0;
-                    case 'hits': return userData.gmHits || 0;
-                    case 'misses': return userData.gmMisses || 0;
-                    case 'fearEarned': return userData.gmFearGain || 0;
-                    case 'fearSpent': return userData.gmFearSpend || 0;
-                    case 'min': return this._calculateMin(userData.d20Totals);
-                    case 'max': return this._calculateMax(userData.d20Totals);
-                    case 'avg': return this._calculateAvg(userData.d20Totals);
-                    default: return 0;
-                }
-            } else {
-                switch(metric) {
-                    case 'crits': return userData.duality?.crit || 0;
-                    case 'hits': return userData.playerHits || 0;
-                    case 'misses': return userData.playerMisses || 0;
-                    case 'hopeRolls': return userData.duality?.hope || 0;
-                    case 'fearRolls': return userData.duality?.fear || 0;
-                    case 'hopeGain': return userData.playerHopeEarned || 0;
-                    case 'fearGen': return userData.playerFearGenerated || 0;
-                    case 'min': return this._calculateMin(userData.dualityTotals);
-                    case 'max': return this._calculateMax(userData.dualityTotals);
-                    case 'avg': return this._calculateAvg(userData.dualityTotals);
-                    default: return 0;
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)', // Subtle vertical grid
+                            borderColor: '#3f4148'
+                        },
+                        ticks: {
+                            color: '#8b8d96', // Muted text
+                            font: { size: 10 },
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)', // Subtle horizontal grid
+                            borderColor: '#3f4148'
+                        },
+                        ticks: {
+                            color: '#8b8d96', // Muted text
+                            font: { size: 10 },
+                            beginAtZero: true,
+                            precision: 0 
+                        },
+                        beginAtZero: true
+                    }
                 }
             }
-        }
+        });
+    }
 
-        _calculateMin(totals) {
-            if (!totals || Object.keys(totals).length === 0) return 0;
-            const values = Object.keys(totals).map(k => parseInt(k));
-            return Math.min(...values);
+    _parseDate(dateStr) {
+        const parts = dateStr.split('/');
+        if (parts.length === 3) {
+            return new Date(parts[2], parts[1] - 1, parts[0]);
         }
+        return new Date(dateStr);
+    }
 
-        _calculateMax(totals) {
-            if (!totals || Object.keys(totals).length === 0) return 0;
-            const values = Object.keys(totals).map(k => parseInt(k));
-            return Math.max(...values);
-        }
-
-        _calculateAvg(totals) {
-            if (!totals || Object.keys(totals).length === 0) return 0;
-            let sum = 0;
-            let count = 0;
-            for (let val in totals) {
-                const frequency = totals[val];
-                sum += parseInt(val) * frequency;
-                count += frequency;
+    _extractMetricValue(userData, metric, isGM) {
+        if (isGM) {
+            switch(metric) {
+                case 'rolls': return userData.d20Count || 0;
+                case 'crits': return userData.gmCrits || 0;
+                case 'fumbles': return userData.gmFumbles || 0;
+                case 'hits': return userData.gmHits || 0;
+                case 'misses': return userData.gmMisses || 0;
+                case 'fearEarned': return userData.gmFearGain || 0;
+                case 'fearSpent': return userData.gmFearSpend || 0;
+                case 'min': return this._calculateMin(userData.d20Totals);
+                case 'max': return this._calculateMax(userData.d20Totals);
+                case 'avg': return this._calculateAvg(userData.d20Totals);
+                default: return 0;
             }
-            return count > 0 ? parseFloat((sum / count).toFixed(1)) : 0;
-        }
-
-        async close(options = {}) {
-            if (this.chart) {
-                this.chart.destroy();
-                this.chart = null;
+        } else {
+            switch(metric) {
+                case 'crits': return userData.duality?.crit || 0;
+                case 'hits': return userData.playerHits || 0;
+                case 'misses': return userData.playerMisses || 0;
+                case 'hopeRolls': return userData.duality?.hope || 0;
+                case 'fearRolls': return userData.duality?.fear || 0;
+                case 'hopeGain': return userData.playerHopeEarned || 0;
+                case 'fearGen': return userData.playerFearGenerated || 0;
+                case 'min': return this._calculateMin(userData.dualityTotals);
+                case 'max': return this._calculateMax(userData.dualityTotals);
+                case 'avg': return this._calculateAvg(userData.dualityTotals);
+                default: return 0;
             }
-            return super.close(options);
         }
     }
+
+    _calculateMin(totals) {
+        if (!totals || Object.keys(totals).length === 0) return 0;
+        const values = Object.keys(totals).map(k => parseInt(k));
+        return Math.min(...values);
+    }
+
+    _calculateMax(totals) {
+        if (!totals || Object.keys(totals).length === 0) return 0;
+        const values = Object.keys(totals).map(k => parseInt(k));
+        return Math.max(...values);
+    }
+
+    _calculateAvg(totals) {
+        if (!totals || Object.keys(totals).length === 0) return 0;
+        let sum = 0;
+        let count = 0;
+        for (let val in totals) {
+            const frequency = totals[val];
+            sum += parseInt(val) * frequency;
+            count += frequency;
+        }
+        return count > 0 ? parseFloat((sum / count).toFixed(1)) : 0;
+    }
+
+    async close(options = {}) {
+        if (this.chart) {
+            this.chart.destroy();
+            this.chart = null;
+        }
+        return super.close(options);
+    }
+}
 
 //////////////////////////////////////    CHART WINDOW CLASS    //////////////////////////////////////    
 
