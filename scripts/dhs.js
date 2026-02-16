@@ -364,7 +364,7 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
             },
             position: {
                 width: 920,
-                height: 650
+                height: 670
             }
         };
 
@@ -495,6 +495,26 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
             this._updateMetricButtons(isGM);
         }
 
+        _getMetricDisplayLabel(metric) {
+            const labels = {
+                'rolls': 'D20 Rolls',
+                'crits': 'Critical Hits',
+                'fumbles': 'Fumbles',
+                'hits': 'Successful Hits',
+                'misses': 'Missed Rolls',
+                'min': 'Minimum Value',
+                'max': 'Maximum Value',
+                'avg': 'Average Value',
+                'fearEarned': 'Fear Earned',
+                'fearSpent': 'Fear Spent',
+                'hopeRolls': 'Hope Rolls',
+                'fearRolls': 'Fear Rolls',
+                'hopeGain': 'Hope Earned',
+                'fearGen': 'Fear Generated'
+            };
+            return labels[metric] || metric;
+        }
+
         _updateMetricButtons(isGM) {
             const container = this.element.querySelector('#trends-metric-buttons');
             container.innerHTML = '';
@@ -502,30 +522,29 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
             let metrics = [];
             if (isGM) {
                 metrics = [
-                    { key: 'rolls', label: 'Rolls' },
-                    { key: 'crits', label: 'Crits' },
-                    { key: 'fumbles', label: 'Fumbles' },
-                    { key: 'hits', label: 'Hits' },
-                    { key: 'misses', label: 'Misses' },
-                    { key: 'min', label: 'Min' },
-                    { key: 'max', label: 'Max' },
-                    { key: 'avg', label: 'Avg' },
-                    { key: 'count', label: 'Count' },
-                    { key: 'fearEarned', label: 'Fear Earned' },
-                    { key: 'fearSpent', label: 'Fear Spent' }
+                    { key: 'rolls', label: 'Rolls', tooltip: 'Total number of d20 rolls' },
+                    { key: 'crits', label: 'Crits', tooltip: 'Number of critical successes' },
+                    { key: 'fumbles', label: 'Fumbles', tooltip: 'Number of fumbles (natural 1s)' },
+                    { key: 'hits', label: 'Hits', tooltip: 'Number of successful attacks on marked targets' },
+                    { key: 'misses', label: 'Misses', tooltip: 'Number of missed attacks on marked targets' },
+                    { key: 'min', label: 'Min', tooltip: 'Minimum roll value in the period' },
+                    { key: 'max', label: 'Max', tooltip: 'Maximum roll value in the period' },
+                    { key: 'avg', label: 'Avg', tooltip: 'Average roll value in the period' },
+                    { key: 'fearEarned', label: 'Fear Earned', tooltip: 'Total Fear gained' },
+                    { key: 'fearSpent', label: 'Fear Spent', tooltip: 'Total Fear spent' }
                 ];
             } else {
                 metrics = [
-                    { key: 'crits', label: 'Crits' },
-                    { key: 'hits', label: 'Hits' },
-                    { key: 'misses', label: 'Misses' },
-                    { key: 'min', label: 'Min' },
-                    { key: 'max', label: 'Max' },
-                    { key: 'avg', label: 'Avg' },
-                    { key: 'hopeRolls', label: 'Hope Rolls' },
-                    { key: 'fearRolls', label: 'Fear Rolls' },
-                    { key: 'hopeGain', label: 'Hope Gain' },
-                    { key: 'fearGen', label: 'Fear Gen' }
+                    { key: 'crits', label: 'Crits', tooltip: 'Number of critical successes' },
+                    { key: 'hits', label: 'Hits', tooltip: 'Number of successful attacks on marked targets' },
+                    { key: 'misses', label: 'Misses', tooltip: 'Number of missed attacks on marked targets' },
+                    { key: 'min', label: 'Min', tooltip: 'Minimum duality roll value in the period' },
+                    { key: 'max', label: 'Max', tooltip: 'Maximum duality roll value in the period' },
+                    { key: 'avg', label: 'Avg', tooltip: 'Average duality roll value in the period' },
+                    { key: 'hopeRolls', label: 'Hope Rolls', tooltip: 'Number of rolls that resulted in Hope' },
+                    { key: 'fearRolls', label: 'Fear Rolls', tooltip: 'Number of rolls that resulted in Fear' },
+                    { key: 'hopeGain', label: 'Hope Gain', tooltip: 'Number of action rolls that earned Hope' },
+                    { key: 'fearGen', label: 'Fear Gen', tooltip: 'Number of action rolls that generated Fear' }
                 ];
             }
 
@@ -535,6 +554,7 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                 btn.className = 'trends-metric-btn';
                 btn.textContent = metric.label;
                 btn.dataset.metric = metric.key;
+                btn.title = metric.tooltip;
                 btn.addEventListener('click', (e) => this._onMetricSelect(e));
                 container.appendChild(btn);
             });
@@ -625,10 +645,31 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                         },
                         title: {
                             display: true,
-                            text: `${this.selectedUser} - ${this.selectedMetric}`,
+                            text: `${this.selectedUser} - ${this._getMetricDisplayLabel(this.selectedMetric)}`,
                             font: {
                                 size: 16,
                                 weight: 'bold'
+                            }
+                        },
+                        tooltip: {
+                            displayColors: false,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#C19A56',
+                            bodyColor: '#ffffff',
+                            borderColor: '#C19A56',
+                            borderWidth: 1,
+                            padding: 10,
+                            titleFont: {
+                                size: 13,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 12
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Value: ' + context.parsed.y;
+                                }
                             }
                         }
                     },
@@ -668,7 +709,6 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                     case 'misses': return userData.gmMisses || 0;
                     case 'fearEarned': return userData.gmFearGain || 0;
                     case 'fearSpent': return userData.gmFearSpend || 0;
-                    case 'count': return userData.d20Count || 0;
                     case 'min': return this._calculateMin(userData.d20Totals);
                     case 'max': return this._calculateMax(userData.d20Totals);
                     case 'avg': return this._calculateAvg(userData.d20Totals);
