@@ -687,11 +687,11 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                 scales: {
                     x: {
                         grid: {
-                            color: 'rgba(255, 255, 255, 0.05)', // Subtle vertical grid
+                            color: 'rgba(255, 255, 255, 0.15)', // Lighter grid lines (Request)
                             borderColor: '#3f4148'
                         },
                         ticks: {
-                            color: '#8b8d96', // Muted text
+                            color: '#ffffff', // White Text (Request)
                             font: { size: 10 },
                             maxRotation: 45,
                             minRotation: 45
@@ -699,11 +699,11 @@ class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                     },
                     y: {
                         grid: {
-                            color: 'rgba(255, 255, 255, 0.05)', // Subtle horizontal grid
+                            color: 'rgba(255, 255, 255, 0.15)', // Lighter grid lines (Request)
                             borderColor: '#3f4148'
                         },
                         ticks: {
-                            color: '#8b8d96', // Muted text
+                            color: '#ffffff', // White Text (Request)
                             font: { size: 10 },
                             beginAtZero: true,
                             precision: 0 

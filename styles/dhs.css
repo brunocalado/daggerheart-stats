@@ -453,7 +453,7 @@
 /* -------------------------------------------------------- */
 
 .dhs-trends-ui .trends-content {
-    background-color: var(--dh-color-bg);
+    background-color: #1a1b1e; /* Dark theme default */
     padding: 5px;
     display: flex;
     flex-direction: column;
@@ -484,9 +484,9 @@
     gap: 6px;
     justify-content: center;
     padding: 10px;
-    background-color: var(--dh-color-text); /* Escuro para destacar botões dourados */
+    background-color: #0c0c0c; /* Black to enhance contrast */
     border-radius: 6px;
-    border: 1px solid var(--dh-color-gold);
+    border: 2px solid var(--dh-color-gold); /* Matched gold border */
     overflow-x: auto;
 }
 
@@ -506,9 +506,10 @@
 }
 
 .dhs-trends-ui .trends-metric-btn:hover {
-    background-color: rgba(255,255,255,0.05);
-    color: #fff;
-    border-color: #fff;
+    background-color: var(--dh-color-gold); /* Solid gold fill (Request) */
+    color: #000; /* Black text for contrast */
+    border-color: var(--dh-color-gold);
+    box-shadow: 0 0 15px var(--dh-color-gold); /* Intense glow */
 }
 
 .dhs-trends-ui .trends-metric-btn.active {
@@ -523,7 +524,7 @@
     background-color: #1a1b1e; /* Dark background requested */
     padding: 10px 5px;
     border-radius: 6px;
-    border: 1px solid var(--dh-color-gold);
+    border: 2px solid var(--dh-color-gold); /* Matched gold border (Request) */
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     min-height: 440px;
     display: flex;
