@@ -1,3 +1,6 @@
+# 0.1.0
+- code refactor
+
 # 0.0.9
 - visual glitch fixed
 

@@ -56,7 +56,7 @@ https://raw.githubusercontent.com/brunocalado/daggerheart-stats/refs/heads/main/
 
 ## ⚖️ Credits
 
-* **License:** MIT License.
+* **Code License:** GNU GPLv3.
 
 * **Assets:** AI Audio and images provided are [CC0 1.0 Universal Public Domain](https://creativecommons.org/publicdomain/zero/1.0/).
 
@@ -67,6 +67,8 @@ https://raw.githubusercontent.com/brunocalado/daggerheart-stats/refs/heads/main/
 | Module | Description |
 | :--- | :--- |
 | 💀 [**Adversary Manager**](https://github.com/brunocalado/daggerheart-advmanager) | Scale adversaries instantly and build balanced encounters in Foundry VTT. |
+| 💥 [**Critical**](https://github.com/brunocalado/daggerheart-critical) | Animated Critical. |
+| 💠 [**Custom Stat Tracker**](https://github.com/brunocalado/dh-new-stat-tracker) | Add custom trackers to actors. |
 | ☠️ [**Death Moves**](https://github.com/brunocalado/daggerheart-death-moves) | Enhances the Death Move moment with immersive audio and visual effects. |
 | 📏 [**Distances**](https://github.com/brunocalado/daggerheart-distances) | Visualizes combat ranges with customizable rings and hover calculations. |
 | 🤖 [**Fear Macros**](https://github.com/brunocalado/daggerheart-fear-macros) | Automatically executes macros when the Fear resource is changed. |
