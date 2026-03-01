@@ -2,7 +2,13 @@ import { MODULE_ID, FLAG_SCOPE, FLAG_KEY } from './constants.js';
 
 //////////////////////////////////////    DATA CLASS    //////////////////////////////////////
 
+/**
+ * Data structure representing a user's dice statistics for a specific period (usually a day).
+ */
 export class UserDices {
+    /**
+     * @param {string} username - The name of the user.
+     */
     constructor(username) {
         this.username = username;
         this.totalRolls = 0;
@@ -38,6 +44,11 @@ export class UserDices {
         this.reactionStats = { count: 0, hope: 0, fear: 0, crit: 0 };
     }
 
+    /**
+     * Increments the count for a specific dice roll (d12).
+     * 
+     * @param {number} diceNumber - The result of the die roll (1-12).
+     */
     incrementDiceRoll(diceNumber) {
         if (diceNumber >= 1 && diceNumber <= 12) {
             this.diceRolls[diceNumber - 1]++;
@@ -45,6 +56,13 @@ export class UserDices {
         }
     }
 
+    /**
+     * Updates statistics for a D20 roll.
+     * 
+     * @param {number|null} val - The total value of the roll.
+     * @param {boolean} [isCritical=false] - Whether the roll was a critical success.
+     * @param {string} [type="action"] - The type of roll ("action" or "reaction").
+     */
     incrementD20Count(val, isCritical = false, type = "action") {
         this.d20Count++;
         if (isCritical) this.gmCrits++;
@@ -63,6 +81,14 @@ export class UserDices {
         }
     }
 
+    /**
+     * Updates statistics for a Duality roll (Hope/Fear).
+     * 
+     * @param {string} outcomeLabel - The label of the result ("Hope", "Fear", etc.).
+     * @param {boolean} isCrit - Whether the roll was a critical success.
+     * @param {number} totalVal - The total value of the roll.
+     * @param {string} type - The type of roll ("action", "reaction", etc.).
+     */
     registerDualityRoll(outcomeLabel, isCrit, totalVal, type) {
         const label = outcomeLabel ? outcomeLabel.toLowerCase() : "";
         const isHope = label === "hope";
@@ -116,6 +142,12 @@ export class UserDices {
 
 //////////////////////////////////////    UTILITY FUNCTIONS    //////////////////////////////////////
 
+/**
+ * Generates HTML options for the user selection dropdown.
+ * Filters out hidden users based on settings.
+ * 
+ * @returns {string} HTML string of <option> elements.
+ */
 export function getUsersOptions() {
     let usnames = [];
 
@@ -134,6 +166,15 @@ export function getUsersOptions() {
     return whichuser;
 }
 
+/**
+ * Aggregates data for a specific user over a date range and prepares chart data.
+ * 
+ * @param {string} datefrom - Start date (DD/MM/YYYY).
+ * @param {string} dateto - End date (DD/MM/YYYY).
+ * @param {string} theuser - The username to aggregate data for.
+ * @param {string} [filterType='all'] - Filter for roll type ('all', 'action', 'reaction').
+ * @returns {object} Aggregated statistics and HTML content for the chart.
+ */
 export function updatedata(datefrom, dateto, theuser, filterType = 'all') {
     let theuserObj = game.users.find(f => f.name === theuser);
     let theusercolor = theuserObj ? theuserObj.color : "#000000";
@@ -212,6 +253,15 @@ export function updatedata(datefrom, dateto, theuser, filterType = 'all') {
     };
 }
 
+/**
+ * Sums up statistics from the stored flag data within a specified date range.
+ * 
+ * @param {object} data - The user's flag data object containing daily stats.
+ * @param {string} startDate - Start date string.
+ * @param {string} endDate - End date string.
+ * @param {string} [filterType='all'] - Filter type.
+ * @returns {object} An object containing summed totals and statistics.
+ */
 export function sumInRange(data, startDate, endDate, filterType = 'all') {
     let start = new Date(startDate.split('/').reverse().join('-'));
     let end = new Date(endDate.split('/').reverse().join('-'));
@@ -308,6 +358,12 @@ export function sumInRange(data, startDate, endDate, filterType = 'all') {
     return result;
 }
 
+/**
+ * Generates HTML options for date selection based on available data for a user.
+ * 
+ * @param {string} user - The username.
+ * @returns {{messagealldatesfrom: string, messagealldatesto: string}} HTML options for from/to selects.
+ */
 export function populatedates(user) {
     let uObj = game.users.find(f => f.name === user);
     if (!uObj) return { messagealldatesfrom: "", messagealldatesto: "" };

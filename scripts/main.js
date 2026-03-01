@@ -15,6 +15,10 @@ window.DaggerheartStats = {
 
 //////////////////////////////////////    HOOKS    //////////////////////////////////////
 
+/**
+ * Initializes module settings and registers the API.
+ * Hook: init
+ */
 Hooks.once('init', function () {
     game.settings.register(MODULE_ID, 'allowhiddenrolls', { name: 'Allow to Save Hidden Rolls', hint: 'If enabled, Blind and Whisper rolls will be included in the statistics.', scope: 'world', config: true, type: Boolean, default: true });
     game.settings.register(MODULE_ID, 'allowviewgmstats', { name: 'Players can see GM Stats', hint: 'If enabled, players can select the GM in the User dropdown and view their statistics.', scope: 'world', config: true, type: Boolean, default: true });
@@ -66,6 +70,10 @@ Hooks.once('init', function () {
     });
 });
 
+/**
+ * Sets up initial data structures for users and checks for system compatibility.
+ * Hook: ready
+ */
 Hooks.on("ready", function () {
     if (game.system.id !== 'daggerheart') return;
 
@@ -84,6 +92,10 @@ Hooks.on("ready", function () {
     if (game.settings.get(MODULE_ID, 'pausedataacq') && game.user.isGM) { ui.notifications.warn('Daggerheart Statistics: Saving roll data is disabled'); }
 });
 
+/**
+ * Reacts to setting changes, specifically for Fear resource updates to track GM Fear usage.
+ * Hook: updateSetting
+ */
 Hooks.on('updateSetting', (setting, changes) => {
     if (game.system.id !== 'daggerheart') return;
 
@@ -135,6 +147,10 @@ Hooks.on('updateSetting', (setting, changes) => {
     }
 });
 
+/**
+ * Adds the Statistics button to the Scene Controls (left sidebar).
+ * Hook: getSceneControlButtons
+ */
 Hooks.on('getSceneControlButtons', function (controls) {
     if (game.system.id !== 'daggerheart') return;
     let bar = controls.tokens ?? controls.find(c => c.name === 'token');
@@ -152,7 +168,10 @@ Hooks.on('getSceneControlButtons', function (controls) {
     if(Array.isArray(bar.tools)) bar.tools.push(btnData); else bar.tools.dices = btnData;
 });
 
-// Add Stats button to sidebar
+/**
+ * Adds the Statistics button to the Daggerheart System Menu (right sidebar).
+ * Hook: renderDaggerheartMenu
+ */
 Hooks.on("renderDaggerheartMenu", (app, element, data) => {
     const html = element instanceof jQuery ? element[0] : element;
 
@@ -183,6 +202,10 @@ Hooks.on("renderDaggerheartMenu", (app, element, data) => {
     }
 });
 
+/**
+ * Intercepts chat messages to detect and record rolls.
+ * Hook: createChatMessage
+ */
 Hooks.on("createChatMessage", (chatMessage) => {
     if (game.system.id !== 'daggerheart') return;
 
@@ -218,6 +241,12 @@ Hooks.on("createChatMessage", (chatMessage) => {
     if (game.settings.get(MODULE_ID, 'debugmode')) console.log("==============");
 });
 
+/**
+ * Analyzes a chat message to extract roll data and update user statistics.
+ * 
+ * @param {ChatMessage} chatMessage - The chat message document being created.
+ * @returns {void}
+ */
 function detectroll(chatMessage) {
     const user = chatMessage.author;
     if (user.id !== game.user.id) return;

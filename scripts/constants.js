@@ -47,6 +47,12 @@ export const AVAILABLE_ICONS = [
     "fas fa-link", "fas fa-gears", "fas fa-user-shield", "fas fa-burst", "fas fa-chess-knight"
 ];
 
+/**
+ * Logs messages to the console if debug mode is enabled.
+ * 
+ * @param {...any} args - The messages or objects to log.
+ * @returns {void}
+ */
 export function logDebug(...args) {
     if (game.settings.get(MODULE_ID, 'debugmode')) {
         console.log("DHS DEBUG |", ...args);

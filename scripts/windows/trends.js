@@ -2,7 +2,17 @@ import { MODULE_ID, FLAG_SCOPE, FLAG_KEY, HandlebarsApplicationMixin, Applicatio
 
 //////////////////////////////////////    TRENDS WINDOW CLASS    //////////////////////////////////////
 
+/**
+ * Application window for displaying trend charts.
+ * Extends ApplicationV2 with Handlebars support.
+ */
 export class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
+    /**
+     * @param {object} [options] - Application options.
+     * @param {string} [options.dateFrom] - Start date filter.
+     * @param {string} [options.dateTo] - End date filter.
+     * @param {string} [options.selectedUser] - Pre-selected user name.
+     */
     constructor(options = {}) {
         super(options);
         this.dateFrom = options.dateFrom;
@@ -36,6 +46,12 @@ export class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         };
     }
 
+    /**
+     * Prepares the context for rendering, including user and date options.
+     * 
+     * @param {object} options - Render options.
+     * @returns {Promise<object>} Context data.
+     */
     async _prepareContext(options) {
         const context = await super._prepareContext(options);
 
@@ -86,6 +102,13 @@ export class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         return context;
     }
 
+    /**
+     * Lifecycle method called after the application renders.
+     * Loads Chart.js and attaches event listeners.
+     * 
+     * @param {object} context - The rendered context.
+     * @param {object} options - Render options.
+     */
     _onRender(context, options) {
         super._onRender(context, options);
 
@@ -95,6 +118,11 @@ export class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         });
     }
 
+    /**
+     * Dynamically loads the Chart.js library from a CDN if not already present.
+     * 
+     * @returns {Promise<void>} Resolves when the script is loaded.
+     */
     async _loadChartJS() {
         if (typeof Chart !== 'undefined') return;
 
@@ -107,6 +135,11 @@ export class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         });
     }
 
+    /**
+     * Attaches change listeners to inputs and handles initial selection state.
+     * 
+     * @private
+     */
     _attachEventListeners() {
         const userSelect = this.element.querySelector('#trends-user-select');
         if (userSelect) {
@@ -121,6 +154,11 @@ export class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         if (toSelect) toSelect.addEventListener('change', () => this._onDateChange());
     }
 
+    /**
+     * Handles date range changes and re-renders the chart.
+     * 
+     * @private
+     */
     _onDateChange() {
         const fromSelect = this.element.querySelector('#trends-from-date');
         const toSelect = this.element.querySelector('#trends-to-date');
@@ -141,6 +179,11 @@ export class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         this._renderChart();
     }
 
+    /**
+     * Handles user selection changes, updating available metrics based on user role (GM/Player).
+     * 
+     * @private
+     */
     _onUserChange() {
         const userSelect = this.element.querySelector('#trends-user-select');
         if (!userSelect) return;
@@ -155,6 +198,13 @@ export class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         this._updateMetricButtons(isGM);
     }
 
+    /**
+     * Returns a human-readable label for a given metric key.
+     * 
+     * @param {string} metric - The metric key.
+     * @returns {string} Display label.
+     * @private
+     */
     _getMetricDisplayLabel(metric) {
         const labels = {
             'rolls': 'D20 Rolls',
@@ -175,6 +225,12 @@ export class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         return labels[metric] || metric;
     }
 
+    /**
+     * Updates the metric selection buttons based on whether the selected user is a GM.
+     * 
+     * @param {boolean} isGM - Whether the selected user is a GM.
+     * @private
+     */
     _updateMetricButtons(isGM) {
         const container = this.element.querySelector('#trends-metric-buttons');
         container.innerHTML = '';
@@ -224,6 +280,12 @@ export class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         if (firstBtn) firstBtn.click();
     }
 
+    /**
+     * Handles the click event on a metric button.
+     * 
+     * @param {Event} event - The click event.
+     * @private
+     */
     _onMetricSelect(event) {
         const button = event.currentTarget;
         const metric = button.dataset.metric;
@@ -238,6 +300,12 @@ export class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         this._renderChart();
     }
 
+    /**
+     * Renders or updates the Chart.js instance with data for the selected user and metric.
+     * 
+     * @returns {Promise<void>}
+     * @private
+     */
     async _renderChart() {
         if (!this.selectedUser || !this.selectedMetric) return;
 
@@ -391,6 +459,13 @@ export class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         });
     }
 
+    /**
+     * Parses a date string (DD/MM/YYYY) into a Date object.
+     * 
+     * @param {string} dateStr - The date string.
+     * @returns {Date} The parsed Date object.
+     * @private
+     */
     _parseDate(dateStr) {
         const parts = dateStr.split('/');
         if (parts.length === 3) {
@@ -399,6 +474,15 @@ export class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         return new Date(dateStr);
     }
 
+    /**
+     * Extracts the specific metric value from a user's daily data object.
+     * 
+     * @param {UserDices} userData - The data object for a specific day.
+     * @param {string} metric - The metric key to extract.
+     * @param {boolean} isGM - Whether the user is a GM.
+     * @returns {number} The value of the metric.
+     * @private
+     */
     _extractMetricValue(userData, metric, isGM) {
         if (isGM) {
             switch(metric) {
@@ -431,6 +515,13 @@ export class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         }
     }
 
+    /**
+     * Calculates the minimum value from a totals object.
+     * 
+     * @param {object} totals - Frequency map of values.
+     * @returns {number} Minimum value.
+     * @private
+     */
     _calculateMin(totals) {
         if (!totals || Object.keys(totals).length === 0) return 0;
         const values = Object.keys(totals).map(k => parseInt(k));
@@ -455,6 +546,12 @@ export class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         return count > 0 ? parseFloat((sum / count).toFixed(1)) : 0;
     }
 
+    /**
+     * Closes the application and destroys the chart instance.
+     * 
+     * @param {object} [options] - Close options.
+     * @returns {Promise<void>}
+     */
     async close(options = {}) {
         if (this.chart) {
             this.chart.destroy();
