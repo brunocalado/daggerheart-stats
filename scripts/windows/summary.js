@@ -30,7 +30,7 @@ export class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
             contentClasses: ["summary-content"]
         },
         position: {
-            width: 900,
+            width: 1050,
             height: "auto"
         }
     };

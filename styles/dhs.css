@@ -268,8 +268,9 @@
 .dhs-summary-ui .player-row {
     position: relative; /* Allows absolute positioning of children like color-bar */
     background-color: var(--dhs-player-bg);
-    border-bottom: 4px solid var(--dhs-bg-dark); /* Gap effect */
-    padding: 10px 10px 10px 20px; /* Reduced vertical padding, left padding for spacing from bar */
+    border-bottom: none;
+    margin-bottom: 4px;
+    padding: 0 10px 0 20px; /* Reduced vertical padding, left padding for spacing from bar */
     display: grid;
     /* Grid Columns unchanged */
     grid-template-columns: 115px 105px 105px 180px 1fr;
