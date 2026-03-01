@@ -73,34 +73,42 @@
                 </div>
             </div>
 
-            <!-- Col 4: Combat & Stats (Grid) -->
+            <!-- Col 4: Combat & Stats (Grid 4x2) -->
             <div class="stat-group">
                 <div class="combat-grid">
-                    <!-- Row 1 -->
+                    <!-- Row 1: Hits, Miss, Crit, Min -->
                     <div class="combat-box">
                         <span class="combat-label">Hits</span>
                         <span class="combat-val">{{this.hits}}</span>
+                    </div>
+                    <div class="combat-box">
+                        <span class="combat-label">Miss</span>
+                        <span class="combat-val">{{this.misses}}</span>
                     </div>
                     <div class="combat-box">
                         <span class="combat-label">Crit</span>
                         <span class="combat-val">{{this.crits}}</span>
                     </div>
                     <div class="combat-box">
-                        <span class="combat-label">Miss</span>
-                        <span class="combat-val">{{this.misses}}</span>
-                    </div>
-                    <!-- Row 2 -->
-                    <div class="combat-box">
                         <span class="combat-label">Min</span>
                         <span class="combat-val">{{this.min}}</span>
                     </div>
+                    <!-- Row 2: Success, Failure, Avg, Max -->
                     <div class="combat-box">
-                        <span class="combat-label">Max</span>
-                        <span class="combat-val">{{this.max}}</span>
+                        <span class="combat-label">Success</span>
+                        <span class="combat-val">{{this.successes}}</span>
+                    </div>
+                    <div class="combat-box">
+                        <span class="combat-label">Failure</span>
+                        <span class="combat-val">{{this.failures}}</span>
                     </div>
                     <div class="combat-box highlight">
                         <span class="combat-label">Avg</span>
                         <span class="combat-val">{{this.avg}}</span>
+                    </div>
+                    <div class="combat-box">
+                        <span class="combat-label">Max</span>
+                        <span class="combat-val">{{this.max}}</span>
                     </div>
                 </div>
             </div>

@@ -14,7 +14,9 @@ export const DEFAULT_TAGS = {
     hits: "Most Hits",                   // The Professional -> Who hit the most marked targets
     misses: "Most Misses",               // Stormtrooper -> Who missed the most marked targets
     hopeRolls: "Most Hope Rolls",        // Good Vibes Only -> Who rolled the most with hope
-    fearRolls: "Most Fear Rolls"         // Chaos Agent -> Who rolled the most with fear
+    fearRolls: "Most Fear Rolls",        // Chaos Agent -> Who rolled the most with fear
+    successes: "Most Successes",          // Who succeeded the most against difficulty thresholds
+    failures: "Most Failures"             // Who failed the most against difficulty thresholds
 };
 
 export const DEFAULT_TAG_ICONS = {
@@ -24,7 +26,9 @@ export const DEFAULT_TAG_ICONS = {
     hits: "fas fa-swords",
     misses: "fas fa-wind",
     hopeRolls: "fas fa-clover",
-    fearRolls: "fas fa-skull"
+    fearRolls: "fas fa-skull",
+    successes: "fas fa-check",
+    failures: "fas fa-xmark"
 };
 
 export const AVAILABLE_ICONS = [
@@ -44,7 +48,8 @@ export const AVAILABLE_ICONS = [
     "fas fa-wand-magic", "fas fa-user-ninja", "fas fa-shoe-prints", "fas fa-puzzle-piece",
     "fas fa-dungeon", "fas fa-mound", "fas fa-vault", "fas fa-ring", "fas fa-envelope-open-text",
     "fas fa-lightbulb", "fas fa-bullseye", "fas fa-seedling", "fas fa-virus",
-    "fas fa-link", "fas fa-gears", "fas fa-user-shield", "fas fa-burst", "fas fa-chess-knight"
+    "fas fa-link", "fas fa-gears", "fas fa-user-shield", "fas fa-burst", "fas fa-chess-knight",
+    "fas fa-check", "fas fa-xmark"
 ];
 
 /**

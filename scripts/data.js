@@ -27,6 +27,9 @@ export class UserDices {
         // Player Hit and Miss statistics
         this.playerHits = 0;
         this.playerMisses = 0;
+        // Player Success and Failure (when difficulty threshold is set)
+        this.playerSuccesses = 0;
+        this.playerFailures = 0;
         // Hope Earned & Fear Generated (Action Rolls Only)
         this.playerHopeEarned = 0;
         this.playerFearGenerated = 0;
@@ -246,6 +249,8 @@ export function updatedata(datefrom, dateto, theuser, filterType = 'all') {
         // Player Stats
         playerHits: result.playerHits,
         playerMisses: result.playerMisses,
+        playerSuccesses: result.playerSuccesses,
+        playerFailures: result.playerFailures,
         playerHopeEarned: result.playerHopeEarned,
         playerFearGenerated: result.playerFearGenerated,
 
@@ -270,7 +275,7 @@ export function sumInRange(data, startDate, endDate, filterType = 'all') {
         dualityTotals: {}, actionTotals: {}, reactionTotals: {}, currentStats: { count: 0, hope: 0, fear: 0, crit: 0 },
         gmD20Count: 0, gmCrits: 0,
         gmFearGain: 0, gmFearSpend: 0, gmFumbles: 0, gmHits: 0, gmMisses: 0,
-        playerHits: 0, playerMisses: 0, playerHopeEarned: 0, playerFearGenerated: 0,
+        playerHits: 0, playerMisses: 0, playerSuccesses: 0, playerFailures: 0, playerHopeEarned: 0, playerFearGenerated: 0,
         d20Totals: {}, d20ActionTotals: {}, d20ReactionTotals: {}
     };
 
@@ -312,6 +317,8 @@ export function sumInRange(data, startDate, endDate, filterType = 'all') {
             if (filterType !== 'reaction') {
                 if (dayData.playerHits) result.playerHits += dayData.playerHits;
                 if (dayData.playerMisses) result.playerMisses += dayData.playerMisses;
+                if (dayData.playerSuccesses) result.playerSuccesses += dayData.playerSuccesses;
+                if (dayData.playerFailures) result.playerFailures += dayData.playerFailures;
                 if (dayData.playerHopeEarned) result.playerHopeEarned += dayData.playerHopeEarned;
                 if (dayData.playerFearGenerated) result.playerFearGenerated += dayData.playerFearGenerated;
             }

@@ -98,6 +98,52 @@ export class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
         tabPanels.forEach(panel => {
             panel.classList.toggle('active', panel.id === `tab-${lastTab}`);
         });
+
+        // Icon Picker: Toggle open/close on trigger click
+        this.element.querySelectorAll('.icon-picker-trigger').forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const container = trigger.closest('.icon-picker-container');
+                // Close all other pickers first
+                this.element.querySelectorAll('.icon-picker-container.active').forEach(c => {
+                    if (c !== container) c.classList.remove('active');
+                });
+                container.classList.toggle('active');
+            });
+        });
+
+        // Icon Picker: Select an icon option
+        this.element.querySelectorAll('.icon-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const container = option.closest('.icon-picker-container');
+                const iconValue = option.dataset.value;
+
+                // Update hidden input
+                const hiddenInput = container.querySelector('.tag-icon-input');
+                if (hiddenInput) hiddenInput.value = iconValue;
+
+                // Update trigger display
+                const triggerIcon = container.querySelector('.icon-picker-trigger i');
+                if (triggerIcon) {
+                    triggerIcon.className = iconValue || 'fas fa-ban';
+                    if (!iconValue) triggerIcon.style.opacity = '0.3';
+                    else triggerIcon.style.opacity = '1';
+                }
+
+                // Update selected state
+                container.querySelectorAll('.icon-option').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+
+                // Close picker
+                container.classList.remove('active');
+            });
+        });
+
+        // Close icon pickers when clicking outside
+        this.element.addEventListener('click', () => {
+            this.element.querySelectorAll('.icon-picker-container.active').forEach(c => c.classList.remove('active'));
+        });
     }
 
     updateDateList(userName) {
@@ -184,14 +230,18 @@ export class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
     static async _onDeleteDate(event, target) { const date = target.dataset.date; const userName = target.dataset.user; const user = game.users.getName(userName); let flagData = user.getFlag(FLAG_SCOPE, FLAG_KEY); delete flagData[date]; if (Object.keys(flagData).length === 0) { let currentDate = new Date(); let dateString = currentDate.toLocaleDateString('en-GB'); flagData = { [dateString]: new UserDices(user.name) }; } await user.unsetFlag(FLAG_SCOPE, FLAG_KEY); await user.setFlag(FLAG_SCOPE, FLAG_KEY, flagData); if(target && target.remove) target.remove(); }
 
     static async _onSaveTags(event, target) {
-        const form = this.element.querySelector('#tag-edit-form');
-        if (!form) return;
-        const inputs = form.querySelectorAll('input[data-tag-key]');
-        const selects = form.querySelectorAll('select[data-icon-key]');
+        const container = this.element.querySelector('.tags-container');
+        if (!container) return;
         let newTags = {};
         let newIcons = {};
-        inputs.forEach(inp => { newTags[inp.dataset.tagKey] = inp.value || DEFAULT_TAGS[inp.dataset.tagKey]; });
-        selects.forEach(sel => { newIcons[sel.dataset.iconKey] = sel.value; });
+        container.querySelectorAll('.tag-input').forEach(inp => {
+            const key = inp.name;
+            if (key) newTags[key] = inp.value || DEFAULT_TAGS[key];
+        });
+        container.querySelectorAll('.tag-icon-input').forEach(inp => {
+            const key = inp.name.replace('_icon', '');
+            if (key) newIcons[key] = inp.value;
+        });
         await game.settings.set(MODULE_ID, 'tagOverrides', newTags);
         await game.settings.set(MODULE_ID, 'tagIcons', newIcons);
         ui.notifications.info("Tags saved successfully.");

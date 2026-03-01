@@ -95,6 +95,8 @@ export class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                 // Player Stats
                 playerHits: p['playerHits'],
                 playerMisses: p['playerMisses'],
+                playerSuccesses: p['playerSuccesses'],
+                playerFailures: p['playerFailures'],
                 playerHopeEarned: p['playerHopeEarned'],
                 playerFearGenerated: p['playerFearGenerated'],
 
@@ -239,6 +241,11 @@ export class ChartWindow extends HandlebarsApplicationMixin(ApplicationV2) {
             if(pHits) pHits.innerHTML = p['playerHits'];
             const pMiss = html.querySelector('#playerMisses');
             if(pMiss) pMiss.innerHTML = p['playerMisses'];
+
+            const pSucc = html.querySelector('#playerSuccesses');
+            if(pSucc) pSucc.innerHTML = p['playerSuccesses'];
+            const pFail = html.querySelector('#playerFailures');
+            if(pFail) pFail.innerHTML = p['playerFailures'];
 
             const pHopeEarned = html.querySelector('#playerHopeEarned');
             if(pHopeEarned) pHopeEarned.innerHTML = p['playerHopeEarned'];

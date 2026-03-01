@@ -272,11 +272,11 @@
     padding: 10px 10px 10px 20px; /* Reduced vertical padding, left padding for spacing from bar */
     display: grid;
     /* Grid Columns unchanged */
-    grid-template-columns: 115px 105px 105px 125px 1fr;
+    grid-template-columns: 115px 105px 105px 180px 1fr;
     gap: 10px;
     align-items: center;
     /* Fixed Height enforced */
-    height: 96px; 
+    height: 96px;
     max-height: 96px;
     
     /* CORREÇÃO DO FUNDO VAZANDO */
@@ -373,7 +373,7 @@
 /* Combat Grid inside the cell */
 .dhs-summary-ui .combat-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(4, 1fr);
     gap: 4px;
     text-align: center;
 }
@@ -446,6 +446,8 @@
 .dhs-summary-ui .badge-fear-roll, .dhs-summary-ui .badge-chaos, .dhs-summary-ui .badge-fear { background-color: #fee2e2; color: #7f1d1d; border: 1px solid #fca5a5; } /* Darker Red Text */
 .dhs-summary-ui .badge-crit { background-color: #fff8e1; color: #b45309; border: 1px solid #ffe082; } /* Darker Orange/Gold Text */
 .dhs-summary-ui .badge-hit, .dhs-summary-ui .badge-miss { background-color: #e5e7eb; color: #111827; border: 1px solid #d1d5db; }
+.dhs-summary-ui .badge-success { background-color: #dcfce7; color: #14532d; border: 1px solid #86efac; }
+.dhs-summary-ui .badge-failure { background-color: #fee2e2; color: #7f1d1d; border: 1px solid #fca5a5; }
 
 
 /* -------------------------------------------------------- */
@@ -459,7 +461,7 @@
     flex-direction: column;
     gap: 15px;
     overflow-y: auto;
-    min-width: 880px;
+    min-width: 1000px;
     min-height: 560px;
 }
 

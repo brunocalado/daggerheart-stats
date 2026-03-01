@@ -412,6 +412,21 @@ function detectroll(chatMessage) {
                 logDebug("Player Misses Detected +1");
             }
         }
+
+        // Player Success/Failure Logic (only when difficulty threshold is set)
+        const rollDifficulty = chatMessage.system?.roll?.difficulty ?? null;
+        if (rollDifficulty !== null && rollDifficulty !== undefined) {
+            const isSuccess = chatMessage.system?.roll?.success;
+            if (isSuccess === true) {
+                currentStats.playerSuccesses = (currentStats.playerSuccesses ?? 0) + 1;
+                dataModified = true;
+                logDebug("Player Success Detected +1");
+            } else if (isSuccess === false) {
+                currentStats.playerFailures = (currentStats.playerFailures ?? 0) + 1;
+                dataModified = true;
+                logDebug("Player Failure Detected +1");
+            }
+        }
     }
 
     if (dataModified) {

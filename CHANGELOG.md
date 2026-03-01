@@ -1,5 +1,6 @@
 # 0.1.0
 - code refactor
+- will track success/failure
 
 # 0.0.9
 - visual glitch fixed

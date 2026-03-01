@@ -107,6 +107,8 @@ export class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                     crits: result.dualityCrit,
                     hits: result.playerHits,
                     misses: result.playerMisses,
+                    successes: result.playerSuccesses,
+                    failures: result.playerFailures,
                     fearRolls: result.dualityFear,
                     hopeEarned: result.playerHopeEarned,
                     fearGen: result.playerFearGenerated,
@@ -149,6 +151,12 @@ export class SummaryWindow extends HandlebarsApplicationMixin(ApplicationV2) {
 
         findWinners('fearRolls').forEach(p =>
             p.badges.push({ label: tagNames.fearRolls, icon: tagIcons.fearRolls, class: "badge-fear-roll", tooltip: "Most Rolls with Fear" }));
+
+        findWinners('successes').forEach(p =>
+            p.badges.push({ label: tagNames.successes, icon: tagIcons.successes, class: "badge-success", tooltip: "Most Successes against Difficulty" }));
+
+        findWinners('failures').forEach(p =>
+            p.badges.push({ label: tagNames.failures, icon: tagIcons.failures, class: "badge-failure", tooltip: "Most Failures against Difficulty" }));
 
         return {
             gm: gmData,

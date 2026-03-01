@@ -33,7 +33,7 @@ export class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
             contentClasses: ["trends-content"]
         },
         position: {
-            width: 920,
+            width: 1040,
             height: 670
         }
     };
@@ -220,7 +220,9 @@ export class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
             'hopeRolls': 'Hope Rolls',
             'fearRolls': 'Fear Rolls',
             'hopeGain': 'Hope Earned',
-            'fearGen': 'Fear Generated'
+            'fearGen': 'Fear Generated',
+            'successes': 'Successes',
+            'failures': 'Failures'
         };
         return labels[metric] || metric;
     }
@@ -254,6 +256,8 @@ export class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                 { key: 'crits', label: 'Crits', tooltip: 'Number of critical successes' },
                 { key: 'hits', label: 'Hits', tooltip: 'Number of successful attacks on marked targets' },
                 { key: 'misses', label: 'Misses', tooltip: 'Number of missed attacks on marked targets' },
+                { key: 'successes', label: 'Successes', tooltip: 'Rolls against a difficulty threshold that succeeded' },
+                { key: 'failures', label: 'Failures', tooltip: 'Rolls against a difficulty threshold that failed' },
                 { key: 'min', label: 'Min', tooltip: 'Minimum duality roll value in the period' },
                 { key: 'max', label: 'Max', tooltip: 'Maximum duality roll value in the period' },
                 { key: 'avg', label: 'Avg', tooltip: 'Average duality roll value in the period' },
@@ -507,6 +511,8 @@ export class TrendsWindow extends HandlebarsApplicationMixin(ApplicationV2) {
                 case 'fearRolls': return userData.duality?.fear || 0;
                 case 'hopeGain': return userData.playerHopeEarned || 0;
                 case 'fearGen': return userData.playerFearGenerated || 0;
+                case 'successes': return userData.playerSuccesses || 0;
+                case 'failures': return userData.playerFailures || 0;
                 case 'min': return this._calculateMin(userData.dualityTotals);
                 case 'max': return this._calculateMax(userData.dualityTotals);
                 case 'avg': return this._calculateAvg(userData.dualityTotals);
