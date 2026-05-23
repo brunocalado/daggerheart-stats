@@ -1,0 +1,88 @@
+/* --- DAGGERHEART THEME VARIABLES --- */
+/* Variables scoped to .dhs-app-window prevent leaking into global :root and conflicting with other modules. */
+.dhs-app-window {
+    --dh-color-bg: #F4F1E8;         /* Parchment */
+    --dh-color-text: #1A1615;       /* Almost Black/Dark Brown */
+    --dh-color-gold: #C19A56;       /* Daggerheart Gold */
+    --dh-color-gold-dim: #dccba9;   /* Lighter Gold */
+    --dh-color-hope: #7eb384;
+    --dh-color-fear: #b37e7e;
+    --dh-font-header: "Rokkitt", serif;
+    --dh-font-body: "Inter", sans-serif;
+
+    /* Extended palette */
+    --dhs-gm-bg: #1a1a1a;
+    --dhs-gm-border: #deb887;
+    --dhs-player-bg: #ffffff;
+    --dhs-pill-bg: #f3f4f6;
+    --dhs-bg-dark: #0c0c0c;
+}
+
+/* --- GLOBAL MODULE WINDOW STYLING --- */
+.window-app.dhs-app-window .window-header {
+    background: var(--dh-color-text) !important;
+    color: var(--dh-color-gold) !important;
+    font-family: var(--dh-font-header);
+    border-bottom: 2px solid var(--dh-color-gold);
+}
+
+.window-app.dhs-app-window .window-title {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--dh-color-gold);
+}
+
+.window-app.dhs-app-window .window-content {
+    background: var(--dh-color-bg) !important;
+    color: var(--dh-color-text);
+    font-family: var(--dh-font-body);
+    padding: 0;
+    border-radius: 0 0 4px 4px;
+}
+
+/* --- SHARED COMPONENTS --- */
+.dhs-app-window .action-btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--dh-font-body);
+    transition: transform 0.1s, opacity 0.2s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    white-space: nowrap;
+}
+
+.dhs-app-window .action-btn i { font-size: 14px; }
+.dhs-app-window .action-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.dhs-app-window .action-btn:active { transform: translateY(0); }
+
+/* Button Colors */
+.dhs-app-window .btn-gm { background-color: #7B1FA2; border: 1px solid #6A1B9A; }
+.dhs-app-window .btn-gm.btn-current-gm { background-color: #FFB300; border: 1px solid #FF8F00; color: #000; }
+.dhs-app-window .btn-visibility { background-color: #388E3C; border: 1px solid #2E7D32; }
+.dhs-app-window .btn-visibility.btn-hidden { background-color: #757575; border: 1px solid #616161; }
+.dhs-app-window .btn-export { background-color: #5D4037; border: 1px solid #3E2723; }
+.dhs-app-window .btn-import { background-color: #1976D2; border: 1px solid #0D47A1; }
+.dhs-app-window .btn-delete { background-color: #D32F2F; border: 1px solid #B71C1C; }
+.dhs-app-window .btn-save { background-color: #388E3C; border: 1px solid #2E7D32; }
+.dhs-app-window .btn-reset { background-color: #757575; border: 1px solid #616161; }
+
+.dhs-app-window .compact-select {
+    width: 100%; min-width: 100px; height: 32px;
+    background: #fff; border: 1px solid var(--dh-color-gold);
+    border-radius: 0 0 4px 4px; font-family: var(--dh-font-body);
+    color: var(--dh-color-text); padding: 0 5px; cursor: pointer;
+    box-sizing: border-box; border-top: none;
+}
+
+.dhs-app-window .stats-separator { border: 0; border-top: 2px solid var(--dh-color-gold); margin: 10px 0; opacity: 0.5; }

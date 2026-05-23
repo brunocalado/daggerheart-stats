@@ -2,50 +2,58 @@
   "id": "daggerheart-stats",
   "title": "Daggerheart: Stats",
   "description": "Shows Statistics for Daggerheart dice rolls.",
-  "version": "0.1.0",
+  "version": "0.2.0",
+
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
 
   "authors": [
     {
       "name": "Mestre Digital",
-      "url": "https://www.youtube.com/c/MestreDigital",
+      "url": "http://youtube.com/@mestredigital",
       "flags": {}
     }
   ],
-  
+
   "relationships": {
     "systems": [
       {
         "id": "daggerheart",
         "type": "system",
         "compatibility": {
-          "minimum": "1.5.2"
+          "minimum": "2.2.6"
         }
       }
     ]
   },
-  
+
   "styles": [
-    "styles/dhs.css"
+    "styles/base.css",
+    "styles/chart.css",
+    "styles/manage.css",
+    "styles/summary.css",
+    "styles/trends.css"
   ],
+
   "esmodules": [
     "scripts/main.js"
   ],
-  
+
   "url": "https://github.com/brunocalado/daggerheart-stats",
   "manifest": "https://raw.githubusercontent.com/brunocalado/daggerheart-stats/refs/heads/main/module.json",
   "download": "https://codeload.github.com/brunocalado/daggerheart-stats/zip/main",
-  
-  "compatibility": {
-    "minimum": "13",
-    "verified": "13"
-  },
-  
-  "media": [{
-    "type": "setup",
-    "url": "modules/daggerheart-stats/assets/images/thumbnail.webp",
-    "thumbnail": "modules/daggerheart-stats/assets/images/thumbnail.webp"
-  }],
 
+  "media": [
+    {
+      "type": "setup",
+      "url": "modules/daggerheart-stats/assets/images/thumbnail.webp",
+      "thumbnail": "modules/daggerheart-stats/assets/images/thumbnail.webp",
+      "loop": false,
+      "flags": {}
+    }
+  ],
   "packs": [
     {
       "label": "Macros",
@@ -58,8 +66,8 @@
         "ASSISTANT": "OWNER"
       },
       "flags": {},
-      "banner": "modules/daggerheart-stats/assets/images/banner.webp" 
-    }    
-  ]  
-  
+      "banner": "modules/daggerheart-stats/assets/images/banner.webp"
+    }
+  ],
+  "flags": {}
 }

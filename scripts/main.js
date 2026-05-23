@@ -74,21 +74,26 @@ Hooks.once('init', function () {
  * Sets up initial data structures for users and checks for system compatibility.
  * Hook: ready
  */
-Hooks.on("ready", function () {
+Hooks.on("ready", async function () {
     if (game.system.id !== 'daggerheart') return;
 
     // Initialize initial Fear Value
     currentFearValue = game.settings.get('daggerheart', 'ResourcesFear') || 0;
 
-    let usnames = game.users.contents.map(obj => obj.name);
-    usnames.forEach(element => {
-        let currentDate = new Date();
-        let dateString = currentDate.toLocaleDateString('en-GB');
-        if (!game.users.find(f => f.name === element).getFlag(FLAG_SCOPE, FLAG_KEY)) {
-            let d12sbydate = { [dateString]: new UserDices(element) };
-            game.users.find(f => f.name === element).setFlag(FLAG_SCOPE, FLAG_KEY, d12sbydate);
-        }
-    });
+    // Batch-initialize flag data for users who have no stats yet.
+    // A single updateDocuments call replaces N sequential setFlag writes,
+    // avoiding repeated server round-trips on worlds with many users.
+    const currentDate = new Date();
+    const dateString = currentDate.toLocaleDateString('en-GB');
+    const usersToInit = game.users.contents.filter(u => !u.getFlag(FLAG_SCOPE, FLAG_KEY));
+    if (usersToInit.length > 0) {
+        const updates = usersToInit.map(u => ({
+            _id: u.id,
+            [`flags.${FLAG_SCOPE}.${FLAG_KEY}`]: { [dateString]: new UserDices(u.name) }
+        }));
+        await User.implementation.updateDocuments(updates);
+    }
+
     if (game.settings.get(MODULE_ID, 'pausedataacq') && game.user.isGM) { ui.notifications.warn('Daggerheart Statistics: Saving roll data is disabled'); }
 });
 

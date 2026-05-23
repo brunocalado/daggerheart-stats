@@ -1,0 +1,55 @@
+/* --- MANAGEMENT UI SPECIFIC (.dhs-management-ui) --- */
+
+.dhs-management-ui .gm-crown { color: #FFB300; margin-left: 5px; }
+
+.dhs-management-ui .dhs-management-wrapper { display: flex; flex-direction: column; width: 100%; overflow-y: auto; }
+.dhs-management-ui .dhs-tabs { display: flex; background-color: var(--dh-color-text); border-bottom: 2px solid var(--dh-color-gold); }
+.dhs-management-ui .dhs-tab-btn {
+    flex: 1; background: transparent; border: none; color: var(--dh-color-gold-dim);
+    font-family: var(--dh-font-header); font-size: 16px; font-weight: 700;
+    text-transform: uppercase; padding: 12px; cursor: pointer; transition: all 0.2s; border-radius: 0;
+}
+.dhs-management-ui .dhs-tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
+.dhs-management-ui .dhs-tab-btn.active { color: var(--dh-color-gold); background: rgba(193, 154, 86, 0.1); border-bottom: 3px solid var(--dh-color-gold); }
+.dhs-management-ui .tab-content { display: none; padding: 15px; flex-direction: column; gap: 15px; }
+.dhs-management-ui .tab-content.active { display: flex; }
+.dhs-management-ui .user-list { display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1); }
+.dhs-management-ui .user-row { display: flex; align-items: center; justify-content: space-between; background: #fff; padding: 8px 12px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid transparent; transition: border-color 0.2s; }
+.dhs-management-ui .user-row:hover { border-color: var(--dh-color-gold); }
+.dhs-management-ui .user-name { font-family: var(--dh-font-header); font-weight: 700; font-size: 16px; color: var(--dh-color-text); }
+.dhs-management-ui .user-actions { display: flex; gap: 8px; }
+
+.dhs-management-ui .wipe-all-container { margin-top: 20px; border-top: 1px dashed #D32F2F; padding-top: 20px; display: flex; justify-content: center; }
+.dhs-management-ui .btn-wipe-all {
+    background-color: #B71C1C; color: white; font-family: var(--dh-font-header);
+    font-weight: bold; text-transform: uppercase; padding: 10px 20px;
+    border: 1px solid #880E4F; border-radius: 4px; cursor: pointer; display: flex;
+    align-items: center; gap: 10px; transition: background 0.2s;
+}
+.dhs-management-ui .btn-wipe-all:hover { background-color: #D32F2F; box-shadow: 0 2px 5px rgba(211, 47, 47, 0.4); }
+.dhs-management-ui .date-controls { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.dhs-management-ui .date-controls label { font-weight: bold; }
+.dhs-management-ui .dates-list-container { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px; background: #fff; border: 1px dashed var(--dh-color-gold); border-radius: 4px; min-height: 60px; }
+.dhs-management-ui .date-tag {
+    background-color: var(--dh-color-text); color: var(--dh-color-gold); border: 1px solid var(--dh-color-gold);
+    padding: 4px 10px; border-radius: 0; font-size: 12px; cursor: pointer; font-family: var(--dh-font-body);
+    display: flex; align-items: center; gap: 6px; transition: background 0.2s;
+}
+.dhs-management-ui .date-tag:hover { background-color: #000; color: #fff; text-decoration: line-through; }
+
+.dhs-management-ui .tags-container { display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1); }
+.dhs-management-ui .tag-row { display: flex; align-items: center; gap: 15px; background: #fff; padding: 8px 12px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid transparent; }
+.dhs-management-ui .tag-label { flex: 1; font-family: var(--dh-font-header); font-weight: 700; font-size: 16px; color: var(--dh-color-text); }
+.dhs-management-ui .tag-input { flex: 2; padding: 5px 8px; border: 1px solid var(--dh-color-gold-dim); border-radius: 4px; font-family: var(--dh-font-body); color: var(--dh-color-text); background: #fdfdfd; }
+.dhs-management-ui .tag-input:focus { border-color: var(--dh-color-gold); outline: none; background: #fff; }
+.dhs-management-ui .tags-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.1); }
+.dhs-management-ui .btn-wide { padding: 8px 16px; width: auto; font-family: var(--dh-font-header); font-weight: bold; text-transform: uppercase; gap: 8px; }
+
+.dhs-management-ui .icon-picker-container { position: relative; width: 40px; height: 32px; }
+.dhs-management-ui .icon-picker-trigger { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #fff; border: 1px solid var(--dh-color-gold-dim); border-radius: 4px; cursor: pointer; color: var(--dh-color-text); transition: border-color 0.2s; }
+.dhs-management-ui .icon-picker-trigger:hover { border-color: var(--dh-color-gold); }
+.dhs-management-ui .icon-picker-options { display: none; position: absolute; top: 100%; left: 0; width: 180px; max-height: 200px; overflow-y: auto; background: #fff; border: 1px solid var(--dh-color-gold); border-radius: 4px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 100; padding: 5px; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.dhs-management-ui .icon-picker-container.active .icon-picker-options { display: grid; }
+.dhs-management-ui .icon-option { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px; color: var(--dh-color-text); }
+.dhs-management-ui .icon-option:hover { background-color: rgba(0,0,0,0.05); }
+.dhs-management-ui .icon-option.selected { background-color: var(--dh-color-gold); color: #fff; }

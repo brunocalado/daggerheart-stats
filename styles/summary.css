@@ -1,0 +1,267 @@
+/* --- SUMMARY WINDOW UI SPECIFIC (.dhs-summary-ui) --- */
+
+.dhs-summary-ui .summary-content {
+    background-color: var(--dhs-bg-dark);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow-y: auto;
+    max-height: 85vh;
+}
+
+/* GM Styles (Black & Gold) */
+.dhs-summary-ui .gm-card {
+    background-color: var(--dhs-gm-bg);
+    border: 2px solid var(--dhs-gm-border);
+    color: #fff;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.dhs-summary-ui .gm-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(222, 184, 135, 0.3); /* Gold dim */
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+}
+
+.dhs-summary-ui .gm-header-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--dh-font-header);
+    font-weight: 700;
+    font-size: 1.2em;
+    color: #fff;
+    letter-spacing: 0.5px;
+}
+
+.dhs-summary-ui .gm-header-title i {
+    color: var(--dhs-gm-border); /* Gold */
+    font-size: 1.1em;
+}
+
+.dhs-summary-ui .gm-header-date {
+    font-size: 0.85em;
+    color: var(--dhs-gm-border);
+    font-weight: 700;
+    font-family: var(--dh-font-header);
+}
+
+.dhs-summary-ui .gm-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px 16px; /* Row Gap, Col Gap */
+    text-align: center;
+}
+
+.dhs-summary-ui .gm-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+}
+
+.dhs-summary-ui .gm-stat label {
+    text-transform: uppercase;
+    color: #9ca3af; /* Gray-400 equivalent */
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.dhs-summary-ui .gm-stat span {
+    font-family: monospace;
+    font-size: 13px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.dhs-summary-ui .gm-stat span.gold { color: var(--dhs-gm-border); }
+
+/* Player List Container */
+.dhs-summary-ui .player-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: transparent;
+}
+
+/* Player Card (White & Clean) */
+.dhs-summary-ui .player-row {
+    position: relative; /* Allows absolute positioning of children like color-bar */
+    background-color: var(--dhs-player-bg);
+    border-bottom: none;
+    margin-bottom: 4px;
+    padding: 0 10px 0 20px; /* Reduced vertical padding, left padding for spacing from bar */
+    display: grid;
+    grid-template-columns: 115px 105px 105px 180px 1fr;
+    gap: 10px;
+    align-items: center;
+    height: 96px;
+    max-height: 96px;
+
+    /* Prevents the color-bar from bleeding outside rounded corners */
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.dhs-summary-ui .player-identity {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    white-space: nowrap;
+    overflow: hidden;
+    height: 100%;
+    padding-left: 5px;
+}
+
+.dhs-summary-ui .identity-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    overflow: hidden;
+}
+
+.dhs-summary-ui .player-actor {
+    font-family: var(--dh-font-body);
+    font-size: 0.75em;
+    color: #666;
+    font-weight: 600;
+    margin-top: 2px;
+    text-transform: uppercase;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+/* Absolute positioning for full-height color bar */
+.dhs-summary-ui .color-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    z-index: 1;
+    border-radius: 0;
+}
+
+.dhs-summary-ui .player-name {
+    font-family: "Lato", var(--dh-font-body);
+    font-weight: 900;
+    font-size: 1.1em;
+    color: #111;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Stat Groups (Pills) */
+.dhs-summary-ui .stat-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dhs-summary-ui .stat-pill {
+    background-color: var(--dhs-pill-bg);
+    border-radius: 6px;
+    padding: 4px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    min-height: 24px;
+}
+
+.dhs-summary-ui .pill-label {
+    text-transform: uppercase;
+    font-weight: 800;
+    color: #4b5563; /* Gray-600 */
+    font-size: 9px;
+    text-align: left;
+    min-width: 50px;
+}
+
+.dhs-summary-ui .pill-value {
+    font-weight: 900;
+    color: #000;
+    font-size: 13px;
+}
+
+/* Combat Grid inside the cell */
+.dhs-summary-ui .combat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    text-align: center;
+}
+
+.dhs-summary-ui .combat-box {
+    background-color: var(--dhs-pill-bg);
+    border-radius: 4px;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.dhs-summary-ui .combat-box.highlight {
+    background-color: #e5e7eb; /* Slightly darker for Avg/Totals */
+}
+
+.dhs-summary-ui .combat-label {
+    font-size: 8px;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: #6b7280;
+}
+
+.dhs-summary-ui .combat-val {
+    font-weight: 900;
+    font-size: 12px;
+    color: #111;
+}
+
+/* Badges Area */
+.dhs-summary-ui .player-badges {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    align-content: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 6px;
+    padding: 4px;
+    height: 100%;
+    overflow: hidden;
+}
+
+.dhs-summary-ui .badge {
+    font-size: 8.5px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    border: none;
+    box-shadow: none;
+    margin-bottom: 2px;
+}
+
+/* HIGH CONTRAST BADGES */
+.dhs-summary-ui .badge-fear-gen { background-color: #5d4037; color: #fff; } /* Brown */
+.dhs-summary-ui .badge-hope-earn, .dhs-summary-ui .badge-beacon { background-color: #f3e8ff; color: #3b0764; border: 1px solid #d8b4fe; }
+.dhs-summary-ui .badge-hope-roll, .dhs-summary-ui .badge-hope { background-color: #dcfce7; color: #14532d; border: 1px solid #86efac; }
+.dhs-summary-ui .badge-fear-roll, .dhs-summary-ui .badge-chaos, .dhs-summary-ui .badge-fear { background-color: #fee2e2; color: #7f1d1d; border: 1px solid #fca5a5; }
+.dhs-summary-ui .badge-crit { background-color: #fff8e1; color: #b45309; border: 1px solid #ffe082; }
+.dhs-summary-ui .badge-hit, .dhs-summary-ui .badge-miss { background-color: #e5e7eb; color: #111827; border: 1px solid #d1d5db; }
+.dhs-summary-ui .badge-success { background-color: #dcfce7; color: #14532d; border: 1px solid #86efac; }
+.dhs-summary-ui .badge-failure { background-color: #fee2e2; color: #7f1d1d; border: 1px solid #fca5a5; }

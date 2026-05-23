@@ -288,18 +288,17 @@ export class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
         });
 
         if (confirm) {
-            let usnames = game.users.contents.map(obj => obj.name);
-            let currentDate = new Date();
-            let dateString = currentDate.toLocaleDateString('en-GB');
+            const currentDate = new Date();
+            const dateString = currentDate.toLocaleDateString('en-GB');
 
-            for (let element of usnames) {
-                let user = game.users.find(f => f.name === element);
-                if(user) {
-                    let d12sbydate = { [dateString]: new UserDices(user.name) };
-                    await user.unsetFlag(FLAG_SCOPE, FLAG_KEY);
-                    await user.setFlag(FLAG_SCOPE, FLAG_KEY, d12sbydate);
-                }
-            }
+            // Batch-reset all user flags in a single updateDocuments call.
+            // Setting the full flag path replaces the stored value without needing a prior unsetFlag,
+            // and eliminates 2N sequential DB round-trips (one unset + one set per user).
+            const updates = game.users.contents.map(u => ({
+                _id: u.id,
+                [`flags.${FLAG_SCOPE}.${FLAG_KEY}`]: { [dateString]: new UserDices(u.name) }
+            }));
+            await User.implementation.updateDocuments(updates);
             ui.notifications.info("All Daggerheart Stats data has been wiped.");
         }
     }
