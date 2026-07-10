@@ -197,7 +197,7 @@ export class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
         if (user) {
             let currentDate = new Date();
             let dateString = currentDate.toLocaleDateString('en-GB');
-            let d12sbydate = { [dateString]: new UserDices(user.name) };
+            let d12sbydate = { [dateString]: { ...new UserDices(user.name) } };
             await user.unsetFlag(FLAG_SCOPE, FLAG_KEY);
             await user.setFlag(FLAG_SCOPE, FLAG_KEY, d12sbydate);
             ui.notifications.info(`Data deleted for ${user.name}`);
@@ -227,7 +227,7 @@ export class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
         input.click();
     }
 
-    static async _onDeleteDate(event, target) { const date = target.dataset.date; const userName = target.dataset.user; const user = game.users.getName(userName); let flagData = user.getFlag(FLAG_SCOPE, FLAG_KEY); delete flagData[date]; if (Object.keys(flagData).length === 0) { let currentDate = new Date(); let dateString = currentDate.toLocaleDateString('en-GB'); flagData = { [dateString]: new UserDices(user.name) }; } await user.unsetFlag(FLAG_SCOPE, FLAG_KEY); await user.setFlag(FLAG_SCOPE, FLAG_KEY, flagData); if(target && target.remove) target.remove(); }
+    static async _onDeleteDate(event, target) { const date = target.dataset.date; const userName = target.dataset.user; const user = game.users.getName(userName); let flagData = foundry.utils.deepClone(user.getFlag(FLAG_SCOPE, FLAG_KEY)) || {}; delete flagData[date]; if (Object.keys(flagData).length === 0) { const dateString = new Date().toLocaleDateString('en-GB'); flagData = { [dateString]: { ...new UserDices(user.name) } }; } await user.unsetFlag(FLAG_SCOPE, FLAG_KEY); await user.setFlag(FLAG_SCOPE, FLAG_KEY, flagData); if(target && target.remove) target.remove(); }
 
     static async _onSaveTags(event, target) {
         const container = this.element.querySelector('.tags-container');
@@ -296,7 +296,8 @@ export class manageDiceData extends HandlebarsApplicationMixin(ApplicationV2) {
             // and eliminates 2N sequential DB round-trips (one unset + one set per user).
             const updates = game.users.contents.map(u => ({
                 _id: u.id,
-                [`flags.${FLAG_SCOPE}.${FLAG_KEY}`]: { [dateString]: new UserDices(u.name) }
+                // Spread to a plain object: ObjectField._cast wipes non-plain (class) instances to {}.
+                [`flags.${FLAG_SCOPE}.${FLAG_KEY}`]: { [dateString]: { ...new UserDices(u.name) } }
             }));
             await User.implementation.updateDocuments(updates);
             ui.notifications.info("All Daggerheart Stats data has been wiped.");

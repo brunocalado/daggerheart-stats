@@ -1,3 +1,10 @@
+# 0.2.1
+
+- [Fixed] Rolls not being recorded on Daggerheart 2.5.0: the system moved the chat-message roll fields. Hope/Fear now read from `roll.withHope`/`roll.withFear`, action/reaction from `roll.options.actionType`, difficulty/success from `roll.options.roll`, and adversary rolls from the message type.
+- [Fixed] Stats were never persisting to the database and never synced to other clients (data appeared locally but was lost on reload and invisible to the GM). Cause: stats were stored as `UserDices` class instances, which Foundry v14's `ObjectField._cast` silently wipes to `{}` on save. Flags are now written as plain objects.
+- [Fixed] `getFlag` results are now cloned before mutation to avoid diffed updates being dropped as no-ops.
+- https://github.com/brunocalado/daggerheart-stats/issues/1
+
 # 0.2.0
 
 - v14 only

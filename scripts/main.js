@@ -89,7 +89,8 @@ Hooks.on("ready", async function () {
     if (usersToInit.length > 0) {
         const updates = usersToInit.map(u => ({
             _id: u.id,
-            [`flags.${FLAG_SCOPE}.${FLAG_KEY}`]: { [dateString]: new UserDices(u.name) }
+            // Spread to a plain object: ObjectField._cast wipes non-plain (class) instances to {}.
+            [`flags.${FLAG_SCOPE}.${FLAG_KEY}`]: { [dateString]: { ...new UserDices(u.name) } }
         }));
         await User.implementation.updateDocuments(updates);
     }
@@ -125,7 +126,10 @@ Hooks.on('updateSetting', (setting, changes) => {
             let dateString = currentDate.toLocaleDateString('en-GB');
             const user = game.user;
 
-            let userflag = user.getFlag(FLAG_SCOPE, FLAG_KEY) || {};
+            // deepClone is required: getFlag returns a live reference into the document source.
+            // Mutating it in place would make the diff-based update a no-op, so nothing would
+            // persist to the database or broadcast to other clients (only local memory changes).
+            let userflag = foundry.utils.deepClone(user.getFlag(FLAG_SCOPE, FLAG_KEY)) || {};
             if (!userflag[dateString]) userflag[dateString] = new UserDices(user.name);
 
             let currentStats = new UserDices(user.name);
@@ -145,8 +149,11 @@ Hooks.on('updateSetting', (setting, changes) => {
                 logDebug(`GM Spent ${Math.abs(diff)} Fear. Total Spend: ${currentStats.gmFearSpend}`);
             }
 
-            userflag[dateString] = currentStats;
-            user.setFlag(FLAG_SCOPE, FLAG_KEY, userflag);
+            // See detectroll(): must store a plain object. A UserDices class instance would be
+            // wiped to {} by ObjectField._cast; the spread + deepClone yields a plain deep copy.
+            userflag[dateString] = foundry.utils.deepClone({ ...currentStats });
+            user.setFlag(FLAG_SCOPE, FLAG_KEY, userflag)
+                .catch(err => console.error("DHS | Failed to persist Fear stats flag:", err));
         }
         currentFearValue = newFear;
     }
@@ -224,14 +231,22 @@ Hooks.on("createChatMessage", (chatMessage) => {
             isCrit = chatMessage.system.roll.isCritical || chatMessage.system.roll.result?.isCritical || false;
         }
         if (!isCrit && (chatMessage.content || "").toLowerCase().includes("critical")) isCrit = true;
-        logDebug("system.roll.isCritical:", chatMessage.system?.roll?.isCritical);
-        logDebug("system.roll.result.isCritical:", chatMessage.system?.roll?.result?.isCritical);
-        logDebug("system.isGM:", chatMessage.system?.isGM);
-        logDebug("type:", chatMessage.type);
-        logDebug("system.roll.type:", chatMessage.system?.roll?.type);
-        logDebug("system.roll.success:", chatMessage.system?.roll?.success);
+        const dbgRoll = chatMessage.system?.roll;
+        logDebug("message.type:", chatMessage.type);
+        logDebug("roll class:", dbgRoll?.constructor?.name);
+        logDebug("roll.total:", dbgRoll?.total);
+        logDebug("roll.isCritical:", dbgRoll?.isCritical);
+        logDebug("roll.withHope:", dbgRoll?.withHope);
+        logDebug("roll.withFear:", dbgRoll?.withFear);
+        logDebug("roll.options.actionType:", dbgRoll?.options?.actionType);
+        logDebug("roll.options.roll.difficulty:", dbgRoll?.options?.roll?.difficulty);
+        logDebug("roll.options.roll.success:", dbgRoll?.options?.roll?.success);
         logDebug("system.hasTarget:", chatMessage.system?.hasTarget);
-        logDebug("system.roll.result.label:", chatMessage.system?.roll?.result?.label);
+        logDebug("system.targetShort:", chatMessage.system?.targetShort);
+        // Legacy fields (pre-2.x) kept for comparison during troubleshooting
+        logDebug("[legacy] roll.type:", dbgRoll?.type);
+        logDebug("[legacy] roll.success:", dbgRoll?.success);
+        logDebug("[legacy] roll.result.label:", dbgRoll?.result?.label);
     }
 
     if (game.settings.get(MODULE_ID, 'pausedataacq')) {
@@ -258,7 +273,10 @@ function detectroll(chatMessage) {
 
     let currentDate = new Date();
     let dateString = currentDate.toLocaleDateString('en-GB');
-    let userflag = user.getFlag(FLAG_SCOPE, FLAG_KEY) || {};
+    // deepClone is required: getFlag returns a live reference into the document source.
+    // Mutating it in place would make the diff-based update a no-op, so nothing would
+    // persist to the database or broadcast to other clients (only local memory changes).
+    let userflag = foundry.utils.deepClone(user.getFlag(FLAG_SCOPE, FLAG_KEY)) || {};
     if (!userflag[dateString]) userflag[dateString] = new UserDices(user.name);
 
     let currentStats = new UserDices(user.name);
@@ -322,9 +340,10 @@ function detectroll(chatMessage) {
 
          if (chatMessage.system?.roll) {
              const sysRoll = chatMessage.system.roll;
-             const hasD20 = sysRoll.dice?.some(d => d.dice === "d20" || (d.formula && d.formula.includes("d20")));
+             const hasD20 = sysRoll.dice?.some(d => d.denomination === "d20" || d.faces === 20 || d.dice === "d20" || (d.formula && d.formula.includes("d20")));
              const isD20Title = (chatMessage.title === "D20 Roll") || (chatMessage.system.title === "D20 Roll");
-             const isAdversary = sysRoll.type === "adversaryRoll";
+             // Daggerheart 2.x tags adversary rolls via the chat message type, not a roll.type field.
+             const isAdversary = chatMessage.type === "adversaryRoll" || sysRoll.type === "adversaryRoll";
 
              if ((hasD20 || isD20Title) && isAdversary) {
                  logDebug("Found System Data (system.roll).");
@@ -336,8 +355,9 @@ function detectroll(chatMessage) {
                      logDebug("GM Fumble Detected!");
                  }
 
+                 const rawType = sysRoll.options?.actionType ?? sysRoll.type;
                  let type = "action";
-                 if (sysRoll.type && typeof sysRoll.type === "string") type = sysRoll.type.toLowerCase();
+                 if (rawType && typeof rawType === "string") type = rawType.toLowerCase();
                  let val = sysRoll.total;
                  if (val === undefined || val === null) val = null;
                  currentStats.incrementD20Count(val, isCrit, type);
@@ -382,20 +402,31 @@ function detectroll(chatMessage) {
 
         if (chatMessage.system?.roll) {
             const r = chatMessage.system.roll;
-            const label = r.result?.label;
             const total = r.total;
-            const isCrit = chatMessage.system.roll.isCritical || r.result?.isCritical || false;
+            const isCrit = r.isCritical === true || r.result?.isCritical === true;
 
-            const isHope = label && label.toLowerCase() === "hope";
-            const isFear = label && label.toLowerCase() === "fear";
+            // Daggerheart 2.x exposes Hope/Fear as the boolean getters withHope/withFear
+            // on the reconstructed DualityRoll instance. Older builds used roll.result.label.
+            let isHope = r.withHope === true;
+            let isFear = r.withFear === true;
+            if (!isHope && !isFear) {
+                const label = (r.result?.label || "").toLowerCase();
+                if (label === "hope") isHope = true;
+                else if (label === "fear") isFear = true;
+            }
 
             if (isHope || isFear || isCrit) {
-                const type = r.type ? r.type.toLowerCase() : "action";
+                // action/reaction now lives in options.actionType; legacy builds used roll.type.
+                const rawType = r.options?.actionType ?? r.type ?? "action";
+                const type = String(rawType).toLowerCase() === "reaction" ? "reaction" : "action";
 
                 // Confirm if it is Action
                 if (type === 'action') isActionRoll = true;
 
-                currentStats.registerDualityRoll(label, isCrit, total, type);
+                // Feed a normalized "hope"/"fear" label so registerDualityRoll buckets it correctly
+                // even when the system no longer emits a textual result label.
+                const outcomeLabel = isHope ? "hope" : (isFear ? "fear" : "");
+                currentStats.registerDualityRoll(outcomeLabel, isCrit, total, type);
                 dataModified = true;
             }
         }
@@ -418,10 +449,13 @@ function detectroll(chatMessage) {
             }
         }
 
-        // Player Success/Failure Logic (only when difficulty threshold is set)
-        const rollDifficulty = chatMessage.system?.roll?.difficulty ?? null;
+        // Player Success/Failure Logic (only when difficulty threshold is set).
+        // Daggerheart 2.x nests difficulty/success under roll.options.roll; older builds
+        // exposed them directly on the roll.
+        const pRoll = chatMessage.system?.roll;
+        const rollDifficulty = pRoll?.options?.roll?.difficulty ?? pRoll?.difficulty ?? null;
         if (rollDifficulty !== null && rollDifficulty !== undefined) {
-            const isSuccess = chatMessage.system?.roll?.success;
+            const isSuccess = pRoll?.options?.roll?.success ?? pRoll?.success;
             if (isSuccess === true) {
                 currentStats.playerSuccesses = (currentStats.playerSuccesses ?? 0) + 1;
                 dataModified = true;
@@ -435,8 +469,14 @@ function detectroll(chatMessage) {
     }
 
     if (dataModified) {
-        logDebug("Data Saved!");
-        userflag[dateString] = currentStats;
-        user.setFlag(FLAG_SCOPE, FLAG_KEY, userflag);
+        // Persist a genuine plain object. currentStats is a UserDices class instance, and
+        // foundry.utils.deepClone does NOT convert class instances (it returns them as-is).
+        // ObjectField._cast rejects any non-plain object and replaces it with {}, so a class
+        // instance would be silently wiped on save. The spread turns it into a plain object;
+        // deepClone then produces a fully detached deep copy.
+        userflag[dateString] = foundry.utils.deepClone({ ...currentStats });
+        user.setFlag(FLAG_SCOPE, FLAG_KEY, userflag)
+            .then(() => logDebug("Data Saved! duality.count now:", user.getFlag(FLAG_SCOPE, FLAG_KEY)?.[dateString]?.duality?.count))
+            .catch(err => console.error("DHS | Failed to persist stats flag:", err));
     }
 }
