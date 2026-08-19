@@ -2,13 +2,12 @@
   "id": "daggerheart-stats",
   "title": "Daggerheart: Stats",
   "description": "Shows Statistics for Daggerheart dice rolls.",
-  "version": "0.2.1",
-
+  "version": "0.2.2",
   "compatibility": {
     "minimum": "14",
-    "verified": "14"
+    "verified": "14",
+    "maximum": "14"
   },
-
   "authors": [
     {
       "name": "Mestre Digital",
@@ -16,7 +15,6 @@
       "flags": {}
     }
   ],
-
   "relationships": {
     "systems": [
       {
@@ -28,23 +26,29 @@
       }
     ]
   },
-
   "styles": [
-    "styles/base.css",
-    "styles/chart.css",
-    "styles/manage.css",
-    "styles/summary.css",
-    "styles/trends.css"
+    {
+      "src": "styles/base.css"
+    },
+    {
+      "src": "styles/chart.css"
+    },
+    {
+      "src": "styles/manage.css"
+    },
+    {
+      "src": "styles/summary.css"
+    },
+    {
+      "src": "styles/trends.css"
+    }
   ],
-
   "esmodules": [
     "scripts/main.js"
   ],
-
   "url": "https://github.com/brunocalado/daggerheart-stats",
   "manifest": "https://raw.githubusercontent.com/brunocalado/daggerheart-stats/refs/heads/main/module.json",
   "download": "https://codeload.github.com/brunocalado/daggerheart-stats/zip/main",
-
   "media": [
     {
       "type": "setup",

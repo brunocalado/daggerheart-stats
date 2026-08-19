@@ -1,3 +1,9 @@
+# 0.2.2
+
+- [Removed] `avatar.webp` (AI-generated image, unused in `module.json`).
+- [Changed] `banner.webp` and `thumbnail.webp` replaced with solid black placeholders (were AI-generated), same dimensions as before.
+- [Verified] Roll-tracking field paths (`roll.withHope`/`withFear`, `roll.isCritical`, `roll.options.actionType`, `roll.options.roll.difficulty`/`success`, and the `dualityRoll`/`adversaryRoll`/`fateRoll` message-type mapping) checked against the Daggerheart system source at v2.7.4 — all still match; no code change needed.
+
 # 0.2.1
 
 - [Fixed] Rolls not being recorded on Daggerheart 2.5.0: the system moved the chat-message roll fields. Hope/Fear now read from `roll.withHope`/`roll.withFear`, action/reaction from `roll.options.actionType`, difficulty/success from `roll.options.roll`, and adversary rolls from the message type.
